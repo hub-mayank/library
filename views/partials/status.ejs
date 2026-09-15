@@ -1,0 +1,12 @@
+<%
+    const labels = {
+        pending: "Pending",
+        issued: "Issued",
+        overdue: "Overdue",
+        returned: "Returned",
+        rejected: "Rejected",
+        paid: "Paid",
+        unpaid: "Unpaid"
+    };
+%>
+<span class="badge badge-<%= status %>"><%= labels[status] %></span>

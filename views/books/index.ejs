@@ -1,0 +1,93 @@
+<%- include("../partials/header") %>
+
+<%
+    const isLibrarian = user.role === "librarian";
+    const myCount = myBookIds.length;
+%>
+
+<div class="page-head">
+    <div>
+        <h1>Catalogue</h1>
+        <p class="muted">
+            <%= books.length %> book<%= books.length === 1 ? "" : "s" %><%= search || category ? " found" : " in the library" %>
+        </p>
+    </div>
+    <% if (isLibrarian) { %>
+        <a href="/books/new" class="btn btn-primary">Add book</a>
+    <% } else { %>
+        <p class="limit">You have <strong><%= myCount %> of <%= maxBooks %></strong> books, pending requests included.</p>
+    <% } %>
+</div>
+
+<form action="/books" method="GET" class="card filters">
+    <div class="field grow">
+        <label for="search">Title or author</label>
+        <input type="text" id="search" name="search" value="<%= search %>" placeholder="e.g. Kalam or Atomic Habits">
+    </div>
+    <div class="field">
+        <label for="category">Category</label>
+        <select id="category" name="category">
+            <option value="">All categories</option>
+            <% categories.forEach((item) => { %>
+                <option value="<%= item %>" <%= item === category ? "selected" : "" %>><%= item %></option>
+            <% }); %>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+    <% if (search || category) { %>
+        <a href="/books" class="btn btn-light">Clear</a>
+    <% } %>
+</form>
+
+<% if (books.length === 0) { %>
+    <div class="card empty-state">
+        <h2>No books found</h2>
+        <% if (search || category) { %>
+            <p class="muted">Nothing matched your search. Try another title, author or category.</p>
+            <a href="/books" class="btn btn-light">Show all books</a>
+        <% } else if (isLibrarian) { %>
+            <p class="muted">The catalogue is empty. Add the first book to get started.</p>
+            <a href="/books/new" class="btn btn-primary">Add book</a>
+        <% } else { %>
+            <p class="muted">The librarian has not added any books yet.</p>
+        <% } %>
+    </div>
+<% } else { %>
+    <div class="book-grid">
+        <% books.forEach((book) => { %>
+            <article class="book spine-<%= book.category.toLowerCase().replace(" ", "-") %>">
+                <div class="book-top">
+                    <span class="book-category"><%= book.category %></span>
+                    <span class="copies <%= book.availableCopies === 0 ? "copies-none" : "" %>">
+                        <%= book.availableCopies %> of <%= book.totalCopies %> available
+                    </span>
+                </div>
+
+                <h2 class="book-title"><%= book.title %></h2>
+                <p class="book-author">by <%= book.author %></p>
+                <p class="book-isbn mono">ISBN <%= book.isbn %></p>
+
+                <div class="book-actions">
+                    <% if (isLibrarian) { %>
+                        <a href="/books/<%= book._id %>/edit" class="btn btn-light btn-small">Edit</a>
+                        <form action="/books/<%= book._id %>/delete" method="POST" onsubmit="return confirm('Delete this book from the catalogue?');">
+                            <button type="submit" class="btn btn-danger btn-small">Delete</button>
+                        </form>
+                    <% } else if (myBookIds.includes(book._id.toString())) { %>
+                        <span class="note">Already requested or borrowed</span>
+                    <% } else if (book.availableCopies === 0) { %>
+                        <span class="note">No copies on the shelf</span>
+                    <% } else if (myCount >= maxBooks) { %>
+                        <span class="note">You have reached your limit</span>
+                    <% } else { %>
+                        <form action="/books/<%= book._id %>/request" method="POST">
+                            <button type="submit" class="btn btn-primary btn-small">Request issue</button>
+                        </form>
+                    <% } %>
+                </div>
+            </article>
+        <% }); %>
+    </div>
+<% } %>
+
+<%- include("../partials/footer") %>

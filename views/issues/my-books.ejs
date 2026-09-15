@@ -1,0 +1,89 @@
+<%- include("../partials/header") %>
+
+<div class="page-head">
+    <div>
+        <h1>My books</h1>
+        <p class="muted">You are using <strong><%= current.length %> of <%= maxBooks %></strong> slots.</p>
+    </div>
+    <a href="/books" class="btn btn-primary">Browse catalogue</a>
+</div>
+
+<% if (unpaidFine > 0) { %>
+    <div class="alert alert-error">You owe &#8377;<%= unpaidFine %> in fines. Please pay at the library desk.</div>
+<% } %>
+
+<section class="card">
+    <h2>Right now</h2>
+    <% if (current.length === 0) { %>
+        <p class="empty">You have no books at the moment. <a href="/books">Find something to read</a>.</p>
+    <% } else { %>
+        <ul class="loan-list">
+            <% current.forEach((issue) => { %>
+                <li class="loan">
+                    <div>
+                        <strong><%= issue.book.title %></strong>
+                        <p class="small muted">by <%= issue.book.author %></p>
+                    </div>
+
+                    <div class="loan-status">
+                        <% if (issue.status === "pending") { %>
+                            <%- include("../partials/status", { status: "pending" }) %>
+                            <span class="small muted">Requested on <%= showDate(issue.requestDate) %></span>
+                        <% } else if (issue.isOverdue()) { %>
+                            <% const days = issue.daysLate(); %>
+                            <%- include("../partials/status", { status: "overdue" }) %>
+                            <span class="stamp stamp-late">Due <%= showDate(issue.dueDate) %></span>
+                            <span class="small late"><%= days %> day<%= days === 1 ? "" : "s" %> late &middot; &#8377;<%= issue.currentFine() %> fine</span>
+                        <% } else { %>
+                            <% const left = issue.daysLeft(); %>
+                            <%- include("../partials/status", { status: "issued" }) %>
+                            <span class="stamp">Due <%= showDate(issue.dueDate) %></span>
+                            <span class="small muted"><%= left === 0 ? "Due today" : left + " day" + (left === 1 ? "" : "s") + " left" %></span>
+                        <% } %>
+                    </div>
+                </li>
+            <% }); %>
+        </ul>
+    <% } %>
+</section>
+
+<section class="card">
+    <h2>History</h2>
+    <% if (history.length === 0) { %>
+        <p class="empty">Books you return will show up here.</p>
+    <% } else { %>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Status</th>
+                        <th>Issued</th>
+                        <th>Returned</th>
+                        <th>Fine</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% history.forEach((issue) => { %>
+                        <tr>
+                            <td><strong><%= issue.book.title %></strong></td>
+                            <td><%- include("../partials/status", { status: issue.status }) %></td>
+                            <td><%= issue.issueDate ? showDate(issue.issueDate) : "-" %></td>
+                            <td><%= issue.returnDate ? showDate(issue.returnDate) : "-" %></td>
+                            <td>
+                                <% if (issue.fine > 0) { %>
+                                    <span class="mono">&#8377;<%= issue.fine %></span>
+                                    <%- include("../partials/status", { status: issue.finePaid ? "paid" : "unpaid" }) %>
+                                <% } else { %>
+                                    <span class="muted">-</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
+</section>
+
+<%- include("../partials/footer") %>

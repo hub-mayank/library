@@ -1,0 +1,57 @@
+<%- include("../partials/header") %>
+
+<% const isEdit = Boolean(book._id); %>
+
+<div class="narrow">
+    <a href="/books" class="back">&larr; Back to catalogue</a>
+    <h1><%= isEdit ? "Edit book" : "Add a book" %></h1>
+
+    <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <form action="<%= action %>" method="POST" class="card form">
+        <div class="field">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" value="<%= book.title || "" %>" required>
+        </div>
+
+        <div class="field">
+            <label for="author">Author</label>
+            <input type="text" id="author" name="author" value="<%= book.author || "" %>" required>
+        </div>
+
+        <div class="row">
+            <div class="field">
+                <label for="isbn">ISBN</label>
+                <input type="text" id="isbn" name="isbn" value="<%= book.isbn || "" %>" placeholder="10 or 13 digits" required>
+            </div>
+            <div class="field">
+                <label for="category">Category</label>
+                <select id="category" name="category" required>
+                    <option value="">Choose a category</option>
+                    <% categories.forEach((item) => { %>
+                        <option value="<%= item %>" <%= item === book.category ? "selected" : "" %>><%= item %></option>
+                    <% }); %>
+                </select>
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="totalCopies">Total copies</label>
+            <input type="number" id="totalCopies" name="totalCopies" min="<%= issuedCopies > 0 ? issuedCopies : 1 %>" value="<%= book.totalCopies || 1 %>" required>
+            <% if (isEdit) { %>
+                <p class="hint"><%= issuedCopies %> cop<%= issuedCopies === 1 ? "y is" : "ies are" %> issued right now. Available copies are worked out from this.</p>
+            <% } else { %>
+                <p class="hint">All copies start on the shelf.</p>
+            <% } %>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-primary"><%= isEdit ? "Save changes" : "Add book" %></button>
+            <a href="/books" class="btn btn-light">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<%- include("../partials/footer") %>

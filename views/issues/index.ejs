@@ -1,0 +1,108 @@
+<%- include("../partials/header") %>
+
+<%
+    const tabNames = {
+        pending: "Pending",
+        issued: "Issued",
+        overdue: "Overdue",
+        fines: "Unpaid fines",
+        returned: "Returned",
+        rejected: "Rejected"
+    };
+%>
+
+<div class="page-head">
+    <div>
+        <h1>Issues</h1>
+        <p class="muted">Approve requests, take books back and collect fines.</p>
+    </div>
+</div>
+
+<nav class="tabs">
+    <% tabs.forEach((name) => { %>
+        <a href="/issues?tab=<%= name %>" class="tab <%= name === tab ? "active" : "" %>">
+            <%= tabNames[name] %> <span class="count"><%= counts[name] %></span>
+        </a>
+    <% }); %>
+</nav>
+
+<section class="card">
+    <% if (issues.length === 0) { %>
+        <p class="empty">Nothing under <%= tabNames[tab].toLowerCase() %> right now.</p>
+    <% } else { %>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Member</th>
+                        <th>Status</th>
+                        <th>Dates</th>
+                        <th>Fine</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% issues.forEach((issue) => { %>
+                        <% const status = issue.isOverdue() ? "overdue" : issue.status; %>
+                        <tr>
+                            <td>
+                                <strong><%= issue.book.title %></strong>
+                                <p class="small muted"><%= issue.book.availableCopies %> on the shelf</p>
+                            </td>
+                            <td>
+                                <%= issue.member.name %>
+                                <p class="small muted"><%= issue.member.email %></p>
+                            </td>
+                            <td><%- include("../partials/status", { status }) %></td>
+                            <td class="small">
+                                <% if (issue.status === "pending" || issue.status === "rejected") { %>
+                                    Requested <%= showDate(issue.requestDate) %>
+                                <% } else if (issue.status === "issued") { %>
+                                    Issued <%= showDate(issue.issueDate) %><br>
+                                    <span class="stamp <%= status === "overdue" ? "stamp-late" : "" %>">Due <%= showDate(issue.dueDate) %></span>
+                                <% } else { %>
+                                    Due <%= showDate(issue.dueDate) %><br>
+                                    Returned <%= showDate(issue.returnDate) %>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (status === "overdue") { %>
+                                    <span class="mono late">&#8377;<%= issue.currentFine() %></span>
+                                    <p class="small muted">so far</p>
+                                <% } else if (issue.fine > 0) { %>
+                                    <span class="mono">&#8377;<%= issue.fine %></span>
+                                    <%- include("../partials/status", { status: issue.finePaid ? "paid" : "unpaid" }) %>
+                                <% } else { %>
+                                    <span class="muted">-</span>
+                                <% } %>
+                            </td>
+                            <td class="right">
+                                <div class="row-actions">
+                                    <% if (issue.status === "pending") { %>
+                                        <form action="/issues/<%= issue._id %>/approve" method="POST">
+                                            <button type="submit" class="btn btn-primary btn-small" <%= issue.book.availableCopies === 0 ? "disabled" : "" %>>Approve</button>
+                                        </form>
+                                        <form action="/issues/<%= issue._id %>/reject" method="POST">
+                                            <button type="submit" class="btn btn-light btn-small">Reject</button>
+                                        </form>
+                                    <% } else if (issue.status === "issued") { %>
+                                        <form action="/issues/<%= issue._id %>/return" method="POST">
+                                            <button type="submit" class="btn btn-light btn-small">Mark returned</button>
+                                        </form>
+                                    <% } else if (issue.status === "returned" && issue.fine > 0 && !issue.finePaid) { %>
+                                        <form action="/issues/<%= issue._id %>/pay" method="POST">
+                                            <button type="submit" class="btn btn-primary btn-small">Mark fine paid</button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
+</section>
+
+<%- include("../partials/footer") %>

@@ -1,0 +1,52 @@
+<%- include("partials/header") %>
+
+<section class="hero">
+    <div class="hero-text">
+        <p class="eyebrow">Library Management &amp; Book Lending</p>
+        <h1>Find a book, borrow it, bring it back on time.</h1>
+        <p class="lead">Browse the catalogue, request the books you want, and keep an eye on due dates and fines, all in one place.</p>
+        <div class="actions">
+            <a href="/register" class="btn btn-primary">Become a member</a>
+            <a href="/login" class="btn btn-light">Login</a>
+        </div>
+    </div>
+
+    <aside class="card rules">
+        <h2>Borrowing rules</h2>
+        <dl>
+            <div>
+                <dt>Books at a time</dt>
+                <dd><%= rules.maxBooks %></dd>
+            </div>
+            <div>
+                <dt>Loan period</dt>
+                <dd><%= rules.loanDays %> days</dd>
+            </div>
+            <div>
+                <dt>Late fine</dt>
+                <dd>&#8377;<%= rules.finePerDay %> a day</dd>
+            </div>
+        </dl>
+        <p class="hint">Pending requests count towards your limit.</p>
+    </aside>
+</section>
+
+<section class="steps">
+    <h2>How borrowing works</h2>
+    <ol class="step-list">
+        <li>
+            <strong>Request</strong>
+            <span>Search the catalogue and request a book that still has copies on the shelf.</span>
+        </li>
+        <li>
+            <strong>Collect</strong>
+            <span>The librarian approves it and your due date is set <%= rules.loanDays %> days from that day.</span>
+        </li>
+        <li>
+            <strong>Return</strong>
+            <span>Bring it back by the due date. Every late day adds &#8377;<%= rules.finePerDay %> to your fine.</span>
+        </li>
+    </ol>
+</section>
+
+<%- include("partials/footer") %>

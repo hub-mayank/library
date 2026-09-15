@@ -1,0 +1,124 @@
+<%- include("partials/header") %>
+
+<div class="page-head">
+    <div>
+        <h1>Dashboard</h1>
+        <p class="muted"><%= showDate(new Date()) %> &middot; how the library looks today</p>
+    </div>
+    <a href="/issues" class="btn btn-light">Open issues</a>
+</div>
+
+<section class="stats">
+    <a href="/books" class="stat">
+        <span class="stat-label">Total books</span>
+        <span class="stat-value"><%= totalBooks %></span>
+        <span class="stat-note"><%= totalCopies %> copies, <%= availableCopies %> on the shelf</span>
+    </a>
+    <a href="/issues?tab=issued" class="stat">
+        <span class="stat-label">Issued books</span>
+        <span class="stat-value"><%= issuedCount %></span>
+        <span class="stat-note">out with members</span>
+    </a>
+    <a href="/issues?tab=overdue" class="stat <%= overdue.length > 0 ? "stat-alert" : "" %>">
+        <span class="stat-label">Overdue books</span>
+        <span class="stat-value"><%= overdue.length %></span>
+        <span class="stat-note">&#8377;<%= overdueFine %> in fines so far</span>
+    </a>
+    <a href="/issues?tab=pending" class="stat">
+        <span class="stat-label">Pending requests</span>
+        <span class="stat-value"><%= pendingCount %></span>
+        <span class="stat-note">waiting for approval</span>
+    </a>
+</section>
+
+<div class="grid-2">
+    <section class="card">
+        <h2>Most borrowed</h2>
+        <% if (mostBorrowed.length === 0) { %>
+            <p class="empty">No book has been issued yet.</p>
+        <% } else { %>
+            <ol class="ranking">
+                <% mostBorrowed.forEach((item) => { %>
+                    <li>
+                        <div class="ranking-row">
+                            <span><strong><%= item.book.title %></strong> <span class="muted">by <%= item.book.author %></span></span>
+                            <span class="mono"><%= item.times %> time<%= item.times === 1 ? "" : "s" %></span>
+                        </div>
+                        <div class="bar"><span style="width: <%= Math.round((item.times / mostBorrowed[0].times) * 100) %>%"></span></div>
+                    </li>
+                <% }); %>
+            </ol>
+        <% } %>
+    </section>
+
+    <section class="card">
+        <h2>Fines</h2>
+        <div class="fine-figures">
+            <div>
+                <span class="stat-label">Unpaid, books returned</span>
+                <span class="fine-value">&#8377;<%= unpaidFine %></span>
+            </div>
+            <div>
+                <span class="stat-label">Still running, overdue books</span>
+                <span class="fine-value">&#8377;<%= overdueFine %></span>
+            </div>
+        </div>
+        <a href="/issues?tab=fines" class="btn btn-light btn-small">Collect fines</a>
+
+        <h2 class="spaced">Waiting for approval</h2>
+        <% if (pending.length === 0) { %>
+            <p class="empty">No requests are waiting.</p>
+        <% } else { %>
+            <ul class="mini-list">
+                <% pending.forEach((issue) => { %>
+                    <li>
+                        <span><strong><%= issue.book.title %></strong> <span class="muted">for <%= issue.member.name %></span></span>
+                        <span class="small muted"><%= showDate(issue.requestDate) %></span>
+                    </li>
+                <% }); %>
+            </ul>
+            <a href="/issues?tab=pending" class="small">Review requests &rarr;</a>
+        <% } %>
+    </section>
+</div>
+
+<section class="card">
+    <h2>Overdue books</h2>
+    <% if (overdue.length === 0) { %>
+        <p class="empty">Nothing is overdue. Every issued book is still within its due date.</p>
+    <% } else { %>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Member</th>
+                        <th>Due</th>
+                        <th>Late by</th>
+                        <th>Fine so far</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% overdue.forEach((issue) => { %>
+                        <% const days = issue.daysLate(); %>
+                        <tr>
+                            <td><strong><%= issue.book.title %></strong></td>
+                            <td><%= issue.member.name %></td>
+                            <td><span class="stamp stamp-late"><%= showDate(issue.dueDate) %></span></td>
+                            <td class="mono"><%= days %> day<%= days === 1 ? "" : "s" %></td>
+                            <td class="mono">&#8377;<%= issue.currentFine() %></td>
+                            <td class="right">
+                                <form action="/issues/<%= issue._id %>/return" method="POST">
+                                    <button type="submit" class="btn btn-light btn-small">Mark returned</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
+</section>
+
+<%- include("partials/footer") %>

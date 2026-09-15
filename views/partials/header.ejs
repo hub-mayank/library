@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | City Library</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header class="nav">
+        <div class="nav-inner">
+            <a href="/" class="brand">
+                <span class="brand-mark">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Z"></path>
+                        <path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5A2.5 2.5 0 0 1 4 20.5Z"></path>
+                    </svg>
+                </span>
+                <span class="brand-name">City Library</span>
+            </a>
+
+            <nav class="nav-links">
+                <% if (user && user.role === "librarian") { %>
+                    <a href="/dashboard">Dashboard</a>
+                    <a href="/books">Catalogue</a>
+                    <a href="/issues">Issues</a>
+                    <a href="/books/new" class="btn btn-primary btn-small">Add book</a>
+                <% } else if (user) { %>
+                    <a href="/books">Catalogue</a>
+                    <a href="/my-books">My books</a>
+                <% } else { %>
+                    <a href="/login">Login</a>
+                    <a href="/register" class="btn btn-primary btn-small">Become a member</a>
+                <% } %>
+
+                <% if (user) { %>
+                    <form action="/logout" method="POST" class="logout">
+                        <span class="nav-user"><%= user.name %> <span class="nav-role"><%= user.role %></span></span>
+                        <button type="submit" class="link-button">Logout</button>
+                    </form>
+                <% } %>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <% if (flash) { %>
+            <div class="alert alert-<%= flash.type %>"><%= flash.message %></div>
+        <% } %>
