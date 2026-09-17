@@ -2,7 +2,7 @@
 
 A web app for running a small library. Members can search the catalogue and request books. The librarian approves requests, takes books back, and collects fines for late returns.
 
-**Live site:**https://library-psal.onrender.com/
+**Live site:** https://library-psal.onrender.com/
 
 ## Features
 
