@@ -9,6 +9,7 @@ A web app for running a small library. Members can search the catalogue and requ
 **Members**
 - Register and login
 - Search books by title or author, and filter by category
+- See book covers, fetched from Open Library using the ISBN already stored on the book
 - Request a book (the librarian has to approve it)
 - See current books, due dates, days left, fines and borrowing history
 

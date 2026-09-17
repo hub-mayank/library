@@ -56,6 +56,12 @@
     <div class="book-grid">
         <% books.forEach((book) => { %>
             <article class="book spine-<%= book.category.toLowerCase().replace(" ", "-") %>">
+                <div class="book-cover">
+                    <span class="book-cover-text"><%= book.title %></span>
+                    <img src="https://covers.openlibrary.org/b/isbn/<%= book.isbn %>-L.jpg?default=false"
+                        alt="Cover of <%= book.title %>" loading="lazy" onerror="this.remove();">
+                </div>
+
                 <div class="book-top">
                     <span class="book-category"><%= book.category %></span>
                     <span class="copies <%= book.availableCopies === 0 ? "copies-none" : "" %>">

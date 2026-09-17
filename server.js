@@ -65,6 +65,11 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
+    // the reply already went out, so let express finish it off
+    if (res.headersSent) {
+        return next(err);
+    }
+
     // a wrong id in the url
     if (err.name === "CastError") {
         return res.status(404).render("error", { title: "Not found", message: "That record does not exist." });
