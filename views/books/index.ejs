@@ -57,7 +57,7 @@
         <% books.forEach((book) => { %>
             <article class="book spine-<%= book.category.toLowerCase().replace(" ", "-") %>">
                 <div class="book-cover">
-                    <span class="book-cover-text"><%= book.title %></span>
+                    <span class="book-cover-text">Cover not available</span>
                     <img src="https://covers.openlibrary.org/b/isbn/<%= book.isbn %>-L.jpg?default=false"
                         alt="Cover of <%= book.title %>" loading="lazy" onerror="this.remove();">
                 </div>

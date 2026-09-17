@@ -37,7 +37,32 @@ const books = [
     { title: "Ikigai", author: "Hector Garcia and Francesc Miralles", isbn: "9780143130727", category: "Self Help", totalCopies: 2 },
     { title: "Panchatantra Stories", author: "Vishnu Sharma", isbn: "9788171674510", category: "Children", totalCopies: 3 },
     { title: "Charlie and the Chocolate Factory", author: "Roald Dahl", isbn: "9780142410318", category: "Children", totalCopies: 2 },
-    { title: "Harry Potter and the Philosopher's Stone", author: "J. K. Rowling", isbn: "9781408855652", category: "Children", totalCopies: 3 }
+    { title: "Harry Potter and the Philosopher's Stone", author: "J. K. Rowling", isbn: "9781408855652", category: "Children", totalCopies: 3 },
+    { title: "The Alchemist", author: "Paulo Coelho", isbn: "9780061122415", category: "Fiction", totalCopies: 3 },
+    { title: "1984", author: "George Orwell", isbn: "9780451524935", category: "Fiction", totalCopies: 4 },
+    { title: "The Kite Runner", author: "Khaled Hosseini", isbn: "9781594631931", category: "Fiction", totalCopies: 2 },
+    { title: "Train to Pakistan", author: "Khushwant Singh", isbn: "9780143065883", category: "Fiction", totalCopies: 2 },
+    { title: "Midnight's Children", author: "Salman Rushdie", isbn: "9780812976533", category: "Fiction", totalCopies: 2 },
+    { title: "A Brief History of Time", author: "Stephen Hawking", isbn: "9780553380163", category: "Science", totalCopies: 3 },
+    { title: "Astrophysics for People in a Hurry", author: "Neil deGrasse Tyson", isbn: "9780393609394", category: "Science", totalCopies: 2 },
+    { title: "The Immortal Life of Henrietta Lacks", author: "Rebecca Skloot", isbn: "9781400052189", category: "Science", totalCopies: 2 },
+    { title: "The Mythical Man-Month", author: "Frederick P. Brooks Jr.", isbn: "9780201835953", category: "Technology", totalCopies: 2 },
+    { title: "Eloquent JavaScript", author: "Marijn Haverbeke", isbn: "9781593279509", category: "Technology", totalCopies: 3 },
+    { title: "Design Patterns", author: "Erich Gamma and others", isbn: "9780201633610", category: "Technology", totalCopies: 2 },
+    { title: "Refactoring", author: "Martin Fowler", isbn: "9780134757599", category: "Technology", totalCopies: 2 },
+    { title: "Introduction to Algorithms", author: "Thomas H. Cormen", isbn: "9780262033848", category: "Technology", totalCopies: 3 },
+    { title: "Guns, Germs and Steel", author: "Jared Diamond", isbn: "9780393317558", category: "History", totalCopies: 2 },
+    { title: "The Argumentative Indian", author: "Amartya Sen", isbn: "9780312426026", category: "History", totalCopies: 2 },
+    { title: "The Diary of a Young Girl", author: "Anne Frank", isbn: "9780553296983", category: "Biography", totalCopies: 3 },
+    { title: "Long Walk to Freedom", author: "Nelson Mandela", isbn: "9780316548182", category: "Biography", totalCopies: 2 },
+    { title: "Becoming", author: "Michelle Obama", isbn: "9781524763138", category: "Biography", totalCopies: 3 },
+    { title: "Man's Search for Meaning", author: "Viktor E. Frankl", isbn: "9780807014295", category: "Self Help", totalCopies: 3 },
+    { title: "Deep Work", author: "Cal Newport", isbn: "9781455586691", category: "Self Help", totalCopies: 2 },
+    { title: "The Power of Habit", author: "Charles Duhigg", isbn: "9780812981605", category: "Self Help", totalCopies: 2 },
+    { title: "Matilda", author: "Roald Dahl", isbn: "9780142410370", category: "Children", totalCopies: 3 },
+    { title: "The Little Prince", author: "Antoine de Saint-Exupery", isbn: "9780156012195", category: "Children", totalCopies: 3 },
+    { title: "Wonder", author: "R. J. Palacio", isbn: "9780375869020", category: "Children", totalCopies: 2 },
+    { title: "Alice's Adventures in Wonderland", author: "Lewis Carroll", isbn: "9781503222687", category: "Children", totalCopies: 2 }
 ];
 
 // issued and returned are "days ago", a negative number would be in the future
