@@ -59,7 +59,7 @@
                 <div class="book-cover">
                     <span class="book-cover-text">Cover not available</span>
                     <img src="https://covers.openlibrary.org/b/isbn/<%= book.isbn %>-L.jpg?default=false"
-                        alt="Cover of <%= book.title %>" loading="lazy" onerror="this.remove();">
+                        alt="Cover of <%= book.title %>" loading="lazy" onerror="this.closest('.book-cover').classList.add('no-cover'); this.remove();">
                 </div>
 
                 <div class="book-top">

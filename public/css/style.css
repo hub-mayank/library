@@ -683,11 +683,11 @@ a.stat:hover {
     transform: scale(1.08);
 }
 
-/* shown when the ISBN has no cover online */
+/* only shown once a cover has actually failed to load */
 .book-cover-text {
     position: absolute;
     inset: 0;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     padding: 14px;
@@ -695,6 +695,10 @@ a.stat:hover {
     letter-spacing: 0.03em;
     text-align: center;
     color: rgba(255, 255, 255, 0.6);
+}
+
+.book-cover.no-cover .book-cover-text {
+    display: flex;
 }
 
 .book-top,
