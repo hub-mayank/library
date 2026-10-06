@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 
-import type { AuthActionState } from '@/lib/auth/actions';
+import type { AuthActionState } from '@/lib/auth/types';
 
 type Props = {
   action: (

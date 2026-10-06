@@ -11,11 +11,7 @@ import { getAdminClient } from '@/lib/db/admin';
 import { enforceRateLimit } from '@/lib/rate-limit';
 import { getClientIp, ipKey, loginKey } from '@/lib/rate-limit/keys';
 import { RATE_LIMITS } from '@/config/rate-limits';
-
-export type AuthActionState = {
-  error?: string;
-  fieldErrors?: Record<string, string[] | undefined>;
-};
+import type { AuthActionState } from './types';
 
 const parseForm = (formData: FormData) =>
   Object.fromEntries(
