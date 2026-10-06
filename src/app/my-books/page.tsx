@@ -3,11 +3,16 @@ import { requireRole } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { calculateDaysLate } from '@/lib/rules/fines';
 import { toCalendarDate } from '@/lib/rules/dates';
+import { Pagination } from '@/components/Pagination';
+import { PAGE_SIZE } from '@/config/app';
+import { getPageRange, parsePageParam } from '@/lib/query/helpers';
+import { getPageInfo } from '@/lib/query/pagination';
+import { redirect } from 'next/navigation';
 
 export default async function MyBooksPage({
   searchParams,
 }: {
-  searchParams: Promise<{ message?: string }>;
+  searchParams: Promise<{ message?: string; page?: string }>;
 }) {
   const user = await requireRole('member', '/my-books');
   const supabase = await createSupabaseServerClient();
@@ -18,10 +23,17 @@ export default async function MyBooksPage({
     .order('requested_at', { ascending: false });
   const current =
     loans?.filter((loan) => ['pending', 'issued'].includes(loan.status)) ?? [];
-  const history =
+  const allHistory =
     loans?.filter((loan) =>
       ['returned', 'rejected', 'cancelled'].includes(loan.status),
     ) ?? [];
+  const params = await searchParams;
+  const requestedPage = parsePageParam(params.page);
+  const pageInfo = getPageInfo(allHistory.length, requestedPage, PAGE_SIZE);
+  if (pageInfo.page !== requestedPage)
+    redirect(`/my-books${pageInfo.page > 1 ? `?page=${pageInfo.page}` : ''}`);
+  const { from, to } = getPageRange(pageInfo.page, PAGE_SIZE);
+  const history = allHistory.slice(from, to + 1);
   const today = toCalendarDate(new Date());
   const unpaid =
     loans
@@ -54,7 +66,6 @@ export default async function MyBooksPage({
       ) : null}
     </article>
   );
-  const params = await searchParams;
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8">
       <h1 className="text-3xl font-bold">My books</h1>
@@ -72,6 +83,12 @@ export default async function MyBooksPage({
       <div className="grid gap-4 sm:grid-cols-2">
         {history.length ? history.map(card) : <p>No loan history.</p>}
       </div>
+      <Pagination
+        basePath="/my-books"
+        currentParams={{}}
+        pageInfo={pageInfo}
+        total={allHistory.length}
+      />
     </div>
   );
 }

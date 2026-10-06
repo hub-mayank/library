@@ -1,9 +1,14 @@
 import { approve, payFine, reject, returnBook } from './actions';
+import { Pagination } from '@/components/Pagination';
 import { FINE_PER_DAY_INR } from '@/config/library-rules';
 import { requireRole } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { calculateDaysLate } from '@/lib/rules/fines';
 import { toCalendarDate } from '@/lib/rules/dates';
+import { PAGE_SIZE } from '@/config/app';
+import { getPageRange, parsePageParam } from '@/lib/query/helpers';
+import { getPageInfo } from '@/lib/query/pagination';
+import { redirect } from 'next/navigation';
 
 const tabs = [
   'pending',
@@ -18,7 +23,7 @@ const tabs = [
 export default async function IssuesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; message?: string }>;
+  searchParams: Promise<{ tab?: string; message?: string; page?: string }>;
 }) {
   await requireRole('librarian', '/issues');
   const params = await searchParams;
@@ -27,16 +32,36 @@ export default async function IssuesPage({
     : 'pending';
   const today = toCalendarDate(new Date());
   const supabase = await createSupabaseServerClient();
+  const requestedPage = parsePageParam(params.page);
   let query = supabase
     .from('loans')
-    .select('*, books(title), profiles(name)')
-    .order('requested_at', { ascending: false });
+    .select('id', { count: 'exact', head: true });
   if (tab === 'overdue')
     query = query.eq('status', 'issued').lt('due_date', today);
   else if (tab === 'fines')
     query = query.eq('status', 'returned').gt('fine', 0).eq('fine_paid', false);
   else query = query.eq('status', tab);
-  const { data: loans } = await query;
+  const { count } = await query;
+  const pageInfo = getPageInfo(count ?? 0, requestedPage, PAGE_SIZE);
+  if (pageInfo.page !== requestedPage)
+    redirect(
+      `/issues?tab=${tab}${pageInfo.page > 1 ? `&page=${pageInfo.page}` : ''}`,
+    );
+  const { from, to } = getPageRange(pageInfo.page, PAGE_SIZE);
+  let loansQuery = supabase
+    .from('loans')
+    .select('*, books(title), profiles(name)')
+    .range(from, to)
+    .order('requested_at', { ascending: false });
+  if (tab === 'overdue')
+    loansQuery = loansQuery.eq('status', 'issued').lt('due_date', today);
+  else if (tab === 'fines')
+    loansQuery = loansQuery
+      .eq('status', 'returned')
+      .gt('fine', 0)
+      .eq('fine_paid', false);
+  else loansQuery = loansQuery.eq('status', tab);
+  const { data: loans } = await loansQuery;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
@@ -127,6 +152,12 @@ export default async function IssuesPage({
           })}
         </div>
       )}
+      <Pagination
+        basePath="/issues"
+        currentParams={{ tab }}
+        pageInfo={pageInfo}
+        total={count ?? 0}
+      />
     </div>
   );
 }

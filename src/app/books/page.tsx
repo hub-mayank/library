@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
+import { Pagination } from '@/components/Pagination';
 import { CATEGORIES } from '@/config/categories';
 import { MAX_ACTIVE_LOANS } from '@/config/library-rules';
 import { PAGE_SIZE } from '@/config/app';
@@ -10,6 +12,7 @@ import {
   parsePageParam,
   sanitizeSearchTerm,
 } from '@/lib/query/helpers';
+import { getPageInfo } from '@/lib/query/pagination';
 import { requestBook, removeBook } from './actions';
 
 export default async function BooksPage({
@@ -30,9 +33,9 @@ export default async function BooksPage({
   )
     ? params.category
     : undefined;
-  const page = parsePageParam(params.page);
-  const { from, to } = getPageRange(page, PAGE_SIZE);
+  const requestedPage = parsePageParam(params.page);
   const supabase = await createSupabaseServerClient();
+  const { from, to } = getPageRange(requestedPage, PAGE_SIZE);
   let booksQuery = supabase
     .from('books')
     .select('*', { count: 'exact' })
@@ -44,6 +47,13 @@ export default async function BooksPage({
     );
   if (category) booksQuery = booksQuery.eq('category', category);
   const { data: books, count } = await booksQuery;
+  const pageInfo = getPageInfo(count ?? 0, requestedPage, PAGE_SIZE);
+  if (pageInfo.page !== requestedPage) {
+    const query = new URLSearchParams();
+    if (params.q) query.set('q', params.q);
+    if (params.category) query.set('category', params.category);
+    redirect(`/books${query.toString() ? `?${query}` : ''}`);
+  }
   const { count: activeCount } =
     user.role === 'member'
       ? await supabase
@@ -152,11 +162,12 @@ export default async function BooksPage({
           ))}
         </div>
       )}
-      {count && count > PAGE_SIZE ? (
-        <p className="mt-6 text-sm">
-          Page {page} of {Math.ceil(count / PAGE_SIZE)}
-        </p>
-      ) : null}
+      <Pagination
+        basePath="/books"
+        currentParams={{ q: params.q, category: params.category }}
+        pageInfo={pageInfo}
+        total={count ?? 0}
+      />
     </div>
   );
 }
