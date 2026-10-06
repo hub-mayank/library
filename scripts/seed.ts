@@ -111,7 +111,7 @@ const DEMO_BOOKS: DemoBook[] = [
   {
     title: '1491',
     author: 'Charles C. Mann',
-    isbn: '9781400040151',
+    isbn: '9781400040155',
     category: 'History',
     total_copies: 2,
   },
@@ -125,7 +125,7 @@ const DEMO_BOOKS: DemoBook[] = [
   {
     title: 'A Little History of the World',
     author: 'E. H. Gombrich',
-    isbn: '9780307783945',
+    isbn: '9780307783943',
     category: 'History',
     total_copies: 2,
   },
@@ -267,6 +267,12 @@ const requireData = <T>(response: {
   return response.data;
 };
 
+const requireSuccess = (response: {
+  error: { message: string } | null;
+}): void => {
+  if (response.error) throw new Error(response.error.message);
+};
+
 export const seedDemoData = async (): Promise<void> => {
   DEMO_BOOKS.forEach(assertIsbn13);
   const client = getClient();
@@ -281,7 +287,7 @@ export const seedDemoData = async (): Promise<void> => {
     'Demo Member',
   );
 
-  requireData(
+  requireSuccess(
     await client.from('profiles').upsert(
       [
         { id: librarianId, name: 'Demo Librarian', role: 'librarian' },
@@ -291,7 +297,7 @@ export const seedDemoData = async (): Promise<void> => {
     ),
   );
 
-  requireData(await client.from('loans').delete().eq('member_id', memberId));
+  requireSuccess(await client.from('loans').delete().eq('member_id', memberId));
 
   const books = requireData(
     await client
@@ -336,15 +342,23 @@ export const seedDemoData = async (): Promise<void> => {
   const returnedLate = addDays(today, -4);
   const fine = 4 * FINE_PER_DAY_INR;
 
-  requireData(
+  requireSuccess(
     await client.from('loans').insert([
-      { book_id: pendingBook.id, member_id: memberId, status: 'pending' },
+      {
+        book_id: pendingBook.id,
+        member_id: memberId,
+        status: 'pending',
+        fine: 0,
+        fine_paid: false,
+      },
       {
         book_id: issuedBook.id,
         member_id: memberId,
         status: 'issued',
         issued_on: issuedOn,
         due_date: today,
+        fine: 0,
+        fine_paid: false,
       },
       {
         book_id: overdueBook.id,
@@ -352,6 +366,8 @@ export const seedDemoData = async (): Promise<void> => {
         status: 'issued',
         issued_on: overdueIssuedOn,
         due_date: overdueDueDate,
+        fine: 0,
+        fine_paid: false,
       },
       {
         book_id: returnedBook.id,
@@ -360,6 +376,8 @@ export const seedDemoData = async (): Promise<void> => {
         issued_on: addDays(today, -15),
         due_date: addDays(today, -1),
         returned_on: returnedOnTime,
+        fine: 0,
+        fine_paid: false,
       },
       {
         book_id: returnedLateBook.id,
@@ -369,6 +387,7 @@ export const seedDemoData = async (): Promise<void> => {
         due_date: addDays(today, -5),
         returned_on: returnedLate,
         fine,
+        fine_paid: false,
       },
       {
         book_id: paidFineBook.id,
@@ -380,8 +399,20 @@ export const seedDemoData = async (): Promise<void> => {
         fine: 6 * FINE_PER_DAY_INR,
         fine_paid: true,
       },
-      { book_id: rejectedBook.id, member_id: memberId, status: 'rejected' },
-      { book_id: cancelledBook.id, member_id: memberId, status: 'cancelled' },
+      {
+        book_id: rejectedBook.id,
+        member_id: memberId,
+        status: 'rejected',
+        fine: 0,
+        fine_paid: false,
+      },
+      {
+        book_id: cancelledBook.id,
+        member_id: memberId,
+        status: 'cancelled',
+        fine: 0,
+        fine_paid: false,
+      },
     ]),
   );
 
@@ -393,7 +424,7 @@ export const seedDemoData = async (): Promise<void> => {
       .eq('status', 'issued');
     if (issuedResult.error) throw new Error(issuedResult.error.message);
     const issued = issuedResult.count ?? 0;
-    requireData(
+    requireSuccess(
       await client
         .from('books')
         .update({ available_copies: book.total_copies - issued })
