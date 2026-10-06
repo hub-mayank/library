@@ -37,6 +37,15 @@ describe('public environment validation', () => {
       }),
     ).toThrow('NEXT_PUBLIC_SUPABASE_URL');
   });
+
+  it('fails when the anon key is missing', () => {
+    const missingAnonKey = { ...validPublicEnv };
+    delete missingAnonKey.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    expect(() => validatePublicEnv(missingAnonKey)).toThrow(
+      'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+    );
+  });
 });
 
 describe('server environment validation', () => {
@@ -44,7 +53,7 @@ describe('server environment validation', () => {
     expect(validateServerEnv(validServerEnv)).toEqual(validServerEnv);
   });
 
-  it.each(['SUPABASE_SERVICE_ROLE_KEY', 'CRON_SECRET'])(
+  it.each(['SUPABASE_SERVICE_ROLE_KEY', 'CRON_SECRET', 'RESEND_API_KEY'])(
     'fails when %s is missing and names the variable',
     (variable) => {
       const missingVariable = { ...validServerEnv };
