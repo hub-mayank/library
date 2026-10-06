@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { Pagination } from '@/components/Pagination';
+import { BookCover } from '@/components/BookCover';
 import { CATEGORIES } from '@/config/categories';
 import { MAX_ACTIVE_LOANS } from '@/config/library-rules';
 import { PAGE_SIZE } from '@/config/app';
@@ -117,8 +118,13 @@ export default async function BooksPage({
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {books.map((book) => (
             <article className="rounded border p-4" key={book.id}>
-              <h2 className="text-xl font-semibold">{book.title}</h2>
-              <p>{book.author}</p>
+              <div className="flex gap-4">
+                <BookCover isbn={book.isbn} title={book.title} />
+                <div>
+                  <h2 className="text-xl font-semibold">{book.title}</h2>
+                  <p>{book.author}</p>
+                </div>
+              </div>
               <p className="mt-2 text-sm">
                 {book.category} · ISBN {book.isbn}
               </p>

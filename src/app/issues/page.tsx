@@ -9,6 +9,7 @@ import { PAGE_SIZE } from '@/config/app';
 import { getPageRange, parsePageParam } from '@/lib/query/helpers';
 import { getPageInfo } from '@/lib/query/pagination';
 import { redirect } from 'next/navigation';
+import { BookCover } from '@/components/BookCover';
 
 const tabs = [
   'pending',
@@ -50,7 +51,7 @@ export default async function IssuesPage({
   const { from, to } = getPageRange(pageInfo.page, PAGE_SIZE);
   let loansQuery = supabase
     .from('loans')
-    .select('*, books(title), profiles(name)')
+    .select('*, books(title, isbn), profiles(name)')
     .range(from, to)
     .order('requested_at', { ascending: false });
   if (tab === 'overdue')
@@ -93,9 +94,18 @@ export default async function IssuesPage({
               : 0;
             return (
               <article className="rounded border p-4" key={loan.id}>
-                <h2 className="font-semibold">
-                  {loan.books?.title ?? 'Unknown book'}
-                </h2>
+                <div className="flex gap-3">
+                  {loan.books?.isbn ? (
+                    <BookCover
+                      isbn={loan.books.isbn}
+                      title={loan.books.title}
+                      small
+                    />
+                  ) : null}
+                  <h2 className="font-semibold">
+                    {loan.books?.title ?? 'Unknown book'}
+                  </h2>
+                </div>
                 <p>
                   {loan.profiles?.name ?? 'Unknown member'} · {loan.status}
                 </p>

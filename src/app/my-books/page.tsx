@@ -8,6 +8,7 @@ import { PAGE_SIZE } from '@/config/app';
 import { getPageRange, parsePageParam } from '@/lib/query/helpers';
 import { getPageInfo } from '@/lib/query/pagination';
 import { redirect } from 'next/navigation';
+import { BookCover } from '@/components/BookCover';
 
 export default async function MyBooksPage({
   searchParams,
@@ -18,7 +19,7 @@ export default async function MyBooksPage({
   const supabase = await createSupabaseServerClient();
   const { data: loans } = await supabase
     .from('loans')
-    .select('*, books(title, author)')
+    .select('*, books(title, author, isbn)')
     .eq('member_id', user.id)
     .order('requested_at', { ascending: false });
   const current =
@@ -41,15 +42,24 @@ export default async function MyBooksPage({
       .reduce((sum, loan) => sum + loan.fine, 0) ?? 0;
   const card = (loan: (typeof current)[number]) => (
     <article className="rounded border p-4" key={loan.id}>
-      <h3 className="font-semibold">{loan.books?.title ?? 'Unknown book'}</h3>
-      <p className="text-sm">Status: {loan.status}</p>
-      {loan.due_date && loan.status === 'issued' ? (
-        <p>
-          {calculateDaysLate(loan.due_date, today)
-            ? `Overdue by ${calculateDaysLate(loan.due_date, today)} days`
-            : 'Not overdue'}
-        </p>
-      ) : null}
+      <div className="flex gap-3">
+        {loan.books?.isbn ? (
+          <BookCover isbn={loan.books.isbn} title={loan.books.title} small />
+        ) : null}
+        <div>
+          <h3 className="font-semibold">
+            {loan.books?.title ?? 'Unknown book'}
+          </h3>
+          <p className="text-sm">Status: {loan.status}</p>
+          {loan.due_date && loan.status === 'issued' ? (
+            <p>
+              {calculateDaysLate(loan.due_date, today)
+                ? `Overdue by ${calculateDaysLate(loan.due_date, today)} days`
+                : 'Not overdue'}
+            </p>
+          ) : null}
+        </div>
+      </div>
       {loan.fine > 0 ? (
         <p>
           Fine: ₹{loan.fine}
