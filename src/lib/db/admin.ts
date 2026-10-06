@@ -4,9 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 
 import { validateServerEnv } from '@/lib/env.server';
 
-import type { RpcClient } from './types';
-
-export const getAdminClient = (): RpcClient => {
+export const getAdminClient = () => {
   const env = validateServerEnv();
 
   return createClient(
