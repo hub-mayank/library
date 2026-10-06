@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { decideAccess, safeRedirectPath } from '@/lib/auth/guards';
+import {
+  defaultRouteForRole,
+  decideAccess,
+  safeRedirectPath,
+} from '@/lib/auth/guards';
 
 describe('auth guards', () => {
   it.each([
@@ -41,6 +45,13 @@ describe('safeRedirectPath', () => {
     undefined,
   ])('rejects %s', (input) => {
     expect(safeRedirectPath(input)).toBe('/');
+  });
+
+  describe('default role routes', () => {
+    it('sends librarians to the dashboard and members to their loans', () => {
+      expect(defaultRouteForRole('librarian')).toBe('/dashboard');
+      expect(defaultRouteForRole('member')).toBe('/my-books');
+    });
   });
 
   it('accepts same-site paths', () => {

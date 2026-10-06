@@ -11,8 +11,6 @@ const validPublicEnv: Record<string, string> = {
 const validServerEnv: Record<string, string> = {
   ...validPublicEnv,
   SUPABASE_SERVICE_ROLE_KEY: 'service-role-key',
-  RESEND_API_KEY: 'resend-key',
-  CRON_SECRET: 'cron-secret',
 };
 
 describe('public environment validation', () => {
@@ -53,7 +51,7 @@ describe('server environment validation', () => {
     expect(validateServerEnv(validServerEnv)).toEqual(validServerEnv);
   });
 
-  it.each(['SUPABASE_SERVICE_ROLE_KEY', 'CRON_SECRET', 'RESEND_API_KEY'])(
+  it.each(['SUPABASE_SERVICE_ROLE_KEY'])(
     'fails when %s is missing and names the variable',
     (variable) => {
       const missingVariable = { ...validServerEnv };

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 
 import { getCurrentUser } from './session';
-import { safeRedirectPath } from './guards';
+import { defaultRouteForRole, safeRedirectPath } from './guards';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { loginSchema, registerSchema } from '@/lib/validation/schemas';
 import { getAdminClient } from '@/lib/db/admin';
@@ -84,7 +84,7 @@ export async function login(
   const user = await getCurrentUser();
   const next = safeRedirectPath(String(formData.get('next') ?? ''), '');
   if (next) redirect(next);
-  redirect(user?.role === 'librarian' ? '/dashboard' : '/books');
+  redirect(user ? defaultRouteForRole(user.role) : '/books');
 }
 
 export async function logout(): Promise<void> {

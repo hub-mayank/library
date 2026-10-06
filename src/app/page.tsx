@@ -6,10 +6,11 @@ import {
   MAX_ACTIVE_LOANS,
 } from '@/config/library-rules';
 import { getCurrentUser } from '@/lib/auth/session';
+import { defaultRouteForRole } from '@/lib/auth/guards';
 
 export default async function Home() {
   const user = await getCurrentUser();
-  if (user) redirect(user.role === 'librarian' ? '/dashboard' : '/my-books');
+  if (user) redirect(defaultRouteForRole(user.role));
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-16">

@@ -5,6 +5,9 @@ export type GuardUser = { role: GuardRole };
 export type AccessDecision =
   { allow: true } | { allow: false; redirectTo: string };
 
+export const defaultRouteForRole = (role: GuardRole): string =>
+  role === 'librarian' ? '/dashboard' : '/my-books';
+
 export const decideAccess = ({
   user,
   requiredRole,

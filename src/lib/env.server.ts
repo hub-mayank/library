@@ -8,8 +8,6 @@ export const serverEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: requiredEnvValue.url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: requiredEnvValue,
   SUPABASE_SERVICE_ROLE_KEY: requiredEnvValue,
-  RESEND_API_KEY: requiredEnvValue,
-  CRON_SECRET: requiredEnvValue,
 });
 
 const formatMissingVariables = (issues: z.ZodError): string => {
