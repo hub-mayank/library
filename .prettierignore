@@ -1,7 +1,5 @@
-# Prettier ignore
 node_modules
 .next
 legacy
-build
-dist
-coverage
+package-lock.json
+tsconfig.tsbuildinfo
