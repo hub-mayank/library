@@ -18,7 +18,7 @@ export function AuthForm({ action, register = false, next }: Props) {
   const error = (name: string) => state.fieldErrors?.[name]?.[0];
 
   return (
-    <form action={formAction} className="space-y-4" noValidate>
+    <form action={formAction} className="space-y-5" noValidate>
       {next ? <input type="hidden" name="next" value={next} /> : null}
       {register ? (
         <label className="block">
@@ -29,7 +29,7 @@ export function AuthForm({ action, register = false, next }: Props) {
             maxLength={80}
             autoComplete="name"
             aria-describedby={error('name') ? 'name-error' : undefined}
-            className="w-full rounded border px-3 py-2"
+            className="mt-1 w-full rounded-xl border px-3 py-2.5 shadow-sm"
           />
           {error('name') ? (
             <span id="name-error" className="text-sm text-red-700">
@@ -46,7 +46,7 @@ export function AuthForm({ action, register = false, next }: Props) {
           required
           autoComplete="email"
           aria-describedby={error('email') ? 'email-error' : undefined}
-          className="w-full rounded border px-3 py-2"
+          className="mt-1 w-full rounded-xl border px-3 py-2.5 shadow-sm"
         />
         {error('email') ? (
           <span id="email-error" className="text-sm text-red-700">
@@ -64,7 +64,7 @@ export function AuthForm({ action, register = false, next }: Props) {
           maxLength={72}
           autoComplete={register ? 'new-password' : 'current-password'}
           aria-describedby={error('password') ? 'password-error' : undefined}
-          className="w-full rounded border px-3 py-2"
+          className="mt-1 w-full rounded-xl border px-3 py-2.5 shadow-sm"
         />
         {error('password') ? (
           <span id="password-error" className="text-sm text-red-700">
@@ -80,7 +80,7 @@ export function AuthForm({ action, register = false, next }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded bg-blue-700 px-4 py-2 font-medium text-white disabled:opacity-50"
+        className="w-full rounded-xl bg-emerald-800 px-4 py-3 font-semibold text-white shadow-sm hover:bg-emerald-900 disabled:opacity-50"
       >
         {pending ? 'Working…' : register ? 'Create account' : 'Sign in'}
       </button>

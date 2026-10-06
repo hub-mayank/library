@@ -16,15 +16,25 @@ export default async function LoginPage({
   const next = safeRedirectPath(params.next, '');
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-12">
-      <h1 className="mb-6 text-3xl font-bold">Sign in</h1>
-      <AuthForm action={login} next={next} />
-      <p className="mt-6 text-sm">
-        Need an account?{' '}
-        <Link className="underline" href="/register">
-          Register
-        </Link>
-      </p>
+    <main className="mx-auto flex w-full max-w-md flex-1 items-center px-4 py-12">
+      <div className="w-full rounded-2xl border bg-white p-6 shadow-sm sm:p-8">
+        <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700">
+          Welcome back
+        </p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight">Sign in</h1>
+        <p className="mt-2 text-sm text-slate-600">
+          Continue where your next good book begins.
+        </p>
+        <div className="mt-7">
+          <AuthForm action={login} next={next} />
+        </div>
+        <p className="mt-6 text-sm text-slate-600">
+          Need an account?{' '}
+          <Link className="underline" href="/register">
+            Register
+          </Link>
+        </p>
+      </div>
     </main>
   );
 }

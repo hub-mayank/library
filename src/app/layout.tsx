@@ -38,41 +38,89 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
           Skip to content
         </a>
         <header className="border-b">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4">
-            <Link href="/" className="text-xl font-bold">
-              Community Library
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-5">
+            <Link href="/" className="group flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-800 text-lg font-bold text-white shadow-sm">
+                CL
+              </span>
+              <span>
+                <span className="block text-lg font-bold tracking-tight">
+                  Community Library
+                </span>
+                <span className="hidden text-xs text-slate-500 sm:block">
+                  Borrow better. Read more.
+                </span>
+              </span>
             </Link>
             <nav
               aria-label="Main navigation"
-              className="flex flex-wrap items-center gap-4 text-sm"
+              className="flex flex-wrap items-center gap-2 text-sm"
             >
               {user ? (
                 <>
                   {user.role === 'member' ? (
                     <>
-                      <Link href="/books">Books</Link>
-                      <Link href="/my-books">My books</Link>
+                      <Link
+                        className="rounded-lg px-3 py-2 hover:bg-emerald-50 hover:text-emerald-800"
+                        href="/books"
+                      >
+                        Books
+                      </Link>
+                      <Link
+                        className="rounded-lg px-3 py-2 hover:bg-emerald-50 hover:text-emerald-800"
+                        href="/my-books"
+                      >
+                        My books
+                      </Link>
                     </>
                   ) : (
                     <>
-                      <Link href="/dashboard">Dashboard</Link>
-                      <Link href="/books">Books</Link>
-                      <Link href="/issues">Issues</Link>
+                      <Link
+                        className="rounded-lg px-3 py-2 hover:bg-emerald-50 hover:text-emerald-800"
+                        href="/dashboard"
+                      >
+                        Dashboard
+                      </Link>
+                      <Link
+                        className="rounded-lg px-3 py-2 hover:bg-emerald-50 hover:text-emerald-800"
+                        href="/books"
+                      >
+                        Books
+                      </Link>
+                      <Link
+                        className="rounded-lg px-3 py-2 hover:bg-emerald-50 hover:text-emerald-800"
+                        href="/issues"
+                      >
+                        Issues
+                      </Link>
                     </>
                   )}
-                  <span className="rounded-full border px-2 py-1">
+                  <span className="ml-1 rounded-full border bg-white px-3 py-2 text-xs text-slate-600">
                     {user.name} · {user.role}
                   </span>
                   <form action={logout}>
-                    <button className="underline" type="submit">
+                    <button
+                      className="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                      type="submit"
+                    >
                       Logout
                     </button>
                   </form>
                 </>
               ) : (
                 <>
-                  <Link href="/login">Log in</Link>
-                  <Link href="/register">Register</Link>
+                  <Link
+                    className="rounded-lg px-3 py-2 text-slate-600 hover:bg-emerald-50 hover:text-emerald-800"
+                    href="/login"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    className="rounded-lg bg-emerald-800 px-4 py-2 font-medium text-white shadow-sm hover:bg-emerald-900"
+                    href="/register"
+                  >
+                    Get started
+                  </Link>
                 </>
               )}
             </nav>
