@@ -13,7 +13,7 @@ import {
   parsePageParam,
   sanitizeSearchTerm,
 } from '@/lib/query/helpers';
-import { getPageInfo } from '@/lib/query/pagination';
+import { buildPageHref, getPageInfo } from '@/lib/query/pagination';
 import { requestBook, removeBook } from './actions';
 
 export default async function BooksPage({
@@ -50,10 +50,13 @@ export default async function BooksPage({
   const { data: books, count } = await booksQuery;
   const pageInfo = getPageInfo(count ?? 0, requestedPage, PAGE_SIZE);
   if (pageInfo.page !== requestedPage) {
-    const query = new URLSearchParams();
-    if (params.q) query.set('q', params.q);
-    if (params.category) query.set('category', params.category);
-    redirect(`/books${query.toString() ? `?${query}` : ''}`);
+    redirect(
+      buildPageHref(
+        '/books',
+        { q: params.q, category: params.category },
+        pageInfo.page,
+      ),
+    );
   }
   const { count: activeCount } =
     user.role === 'member'
