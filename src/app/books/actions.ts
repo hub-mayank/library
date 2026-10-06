@@ -9,6 +9,9 @@ import { rpcFailureMessage } from '@/lib/actions/messages';
 import { getAdminClient } from '@/lib/db/admin';
 import { requireRole } from '@/lib/auth/session';
 import { idSchema, bookSchema } from '@/lib/validation/schemas';
+import { enforceRateLimit } from '@/lib/rate-limit';
+import { userKey } from '@/lib/rate-limit/keys';
+import { RATE_LIMITS } from '@/config/rate-limits';
 
 const formObject = (formData: FormData) =>
   Object.fromEntries(
@@ -17,6 +20,15 @@ const formObject = (formData: FormData) =>
 
 export async function requestBook(formData: FormData) {
   const user = await requireRole('member', '/books');
+  const limited = await enforceRateLimit(getAdminClient(), {
+    key: userKey('request-loan', user.id),
+    ...RATE_LIMITS.REQUEST_LOAN,
+    failOpen: true,
+  });
+  if (!limited.ok)
+    redirect(
+      `/books?message=${encodeURIComponent(`Too many attempts. Try again in ${Math.ceil(limited.retryAfter / 60)} minutes.`)}`,
+    );
   const bookId = idSchema.safeParse(formData.get('bookId'));
   if (!bookId.success) redirect('/books?message=Invalid+book');
   const result = await requestLoan(getAdminClient(), user.id, bookId.data);
@@ -42,7 +54,16 @@ export async function cancelBookLoan(formData: FormData) {
 }
 
 export async function saveBook(formData: FormData) {
-  await requireRole('librarian', '/books');
+  const user = await requireRole('librarian', '/books');
+  const limited = await enforceRateLimit(getAdminClient(), {
+    key: userKey('admin-write', user.id),
+    ...RATE_LIMITS.ADMIN_WRITE,
+    failOpen: true,
+  });
+  if (!limited.ok)
+    redirect(
+      `/books?message=${encodeURIComponent(`Too many attempts. Try again in ${Math.ceil(limited.retryAfter / 60)} minutes.`)}`,
+    );
   const parsed = bookSchema.safeParse({
     ...formObject(formData),
     totalCopies: Number(formData.get('totalCopies')),
@@ -83,7 +104,16 @@ export async function saveBook(formData: FormData) {
 }
 
 export async function removeBook(formData: FormData) {
-  await requireRole('librarian', '/books');
+  const user = await requireRole('librarian', '/books');
+  const limited = await enforceRateLimit(getAdminClient(), {
+    key: userKey('delete-book', user.id),
+    ...RATE_LIMITS.DELETE_BOOK,
+    failOpen: true,
+  });
+  if (!limited.ok)
+    redirect(
+      `/books?message=${encodeURIComponent(`Too many attempts. Try again in ${Math.ceil(limited.retryAfter / 60)} minutes.`)}`,
+    );
   const bookId = idSchema.safeParse(formData.get('bookId'));
   if (!bookId.success) redirect('/books?message=Invalid+book');
   const result = await deleteBook(getAdminClient(), bookId.data);

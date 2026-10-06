@@ -117,6 +117,46 @@ export const verifyDatabase = async (): Promise<void> => {
   await signIn(member, MEMBER_EMAIL, MEMBER_PASSWORD);
   await signIn(librarian, LIBRARIAN_EMAIL, LIBRARIAN_PASSWORD);
 
+  const rateLimitKey = `verify:${Date.now()}`;
+  const firstRateLimit = await admin.rpc('check_rate_limit', {
+    p_key: rateLimitKey,
+    p_limit: 1,
+    p_window_seconds: 60,
+  });
+  if (firstRateLimit.error) {
+    throw new Error(
+      `0004 rate-limit migration is required before verification: ${firstRateLimit.error.message}`,
+    );
+  }
+  await check('rate limiter blocks the limit+1 call', async () => {
+    const second = await admin.rpc('check_rate_limit', {
+      p_key: rateLimitKey,
+      p_limit: 1,
+      p_window_seconds: 60,
+    });
+    return second.error === null && second.data?.ok === false;
+  });
+  await check('anon cannot call rate limiter', async () => {
+    const result = await anon.rpc('check_rate_limit', {
+      p_key: rateLimitKey,
+      p_limit: 1,
+      p_window_seconds: 60,
+    });
+    return Boolean(result.error);
+  });
+  await check('authenticated member cannot call rate limiter', async () => {
+    const result = await member.rpc('check_rate_limit', {
+      p_key: rateLimitKey,
+      p_limit: 1,
+      p_window_seconds: 60,
+    });
+    return Boolean(result.error);
+  });
+  const cleanup = await admin.rpc('delete_stale_rate_limits', {
+    p_older_than_seconds: 0,
+  });
+  if (cleanup.error) throw cleanup.error;
+
   const { data: memberUser } = await member.auth.getUser();
   const memberId = memberUser.user?.id;
   if (!memberId) throw new Error('Member sign-in returned no user');

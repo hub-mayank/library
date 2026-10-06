@@ -13,6 +13,9 @@ import {
 } from '@/lib/db/loans';
 import { rpcFailureMessage } from '@/lib/actions/messages';
 import { idSchema } from '@/lib/validation/schemas';
+import { enforceRateLimit } from '@/lib/rate-limit';
+import { userKey } from '@/lib/rate-limit/keys';
+import { RATE_LIMITS } from '@/config/rate-limits';
 
 const loanId = (formData: FormData): string => {
   const parsed = idSchema.safeParse(formData.get('loanId'));
@@ -32,21 +35,37 @@ const finish = (
 };
 
 export async function approve(formData: FormData) {
-  await requireRole('librarian', '/issues');
+  const user = await requireRole('librarian', '/issues');
+  await checkWriteLimit(user.id);
   finish(await approveLoan(getAdminClient(), loanId(formData)));
 }
 
 export async function reject(formData: FormData) {
-  await requireRole('librarian', '/issues');
+  const user = await requireRole('librarian', '/issues');
+  await checkWriteLimit(user.id);
   finish(await rejectLoan(getAdminClient(), loanId(formData)));
 }
 
 export async function returnBook(formData: FormData) {
-  await requireRole('librarian', '/issues');
+  const user = await requireRole('librarian', '/issues');
+  await checkWriteLimit(user.id);
   finish(await returnLoan(getAdminClient(), loanId(formData)));
 }
 
 export async function payFine(formData: FormData) {
-  await requireRole('librarian', '/issues');
+  const user = await requireRole('librarian', '/issues');
+  await checkWriteLimit(user.id);
   finish(await markFinePaid(getAdminClient(), loanId(formData)));
+}
+
+async function checkWriteLimit(userId: string) {
+  const limited = await enforceRateLimit(getAdminClient(), {
+    key: userKey('admin-write', userId),
+    ...RATE_LIMITS.ADMIN_WRITE,
+    failOpen: true,
+  });
+  if (!limited.ok)
+    redirect(
+      `/issues?message=${encodeURIComponent(`Too many attempts. Try again in ${Math.ceil(limited.retryAfter / 60)} minutes.`)}`,
+    );
 }
