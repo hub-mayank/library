@@ -1,4 +1,15 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
+
 import type { RpcClient, RpcResult } from './types';
+
+export type BookInput = {
+  title: string;
+  author: string;
+  isbn: string;
+  category: string;
+  total_copies: number;
+  available_copies: number;
+};
 
 const rpc = async <T extends RpcResult>(
   client: RpcClient,
@@ -31,3 +42,9 @@ export const deleteBook = (
   client: RpcClient,
   bookId: string,
 ): Promise<RpcResult> => rpc(client, 'delete_book', { p_book: bookId });
+
+export const createBook = async (client: SupabaseClient, input: BookInput) => {
+  const result = await client.from('books').insert(input).select().single();
+  if (result.error) throw new Error(result.error.message);
+  return result.data;
+};
