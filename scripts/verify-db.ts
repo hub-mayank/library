@@ -180,8 +180,8 @@ export const verifyDatabase = async (): Promise<void> => {
       .from('books')
       .select('id,available_copies')
       .order('isbn')
-      .limit(12);
-    if (booksError || !books || books.length < 10)
+      .limit(20);
+    if (booksError || !books || books.length < 16)
       throw booksError ?? new Error('Not enough books');
 
     const first = await rpc(admin, 'request_loan', {
@@ -306,7 +306,7 @@ export const verifyDatabase = async (): Promise<void> => {
     console.log('PASS service-role overdue fine check');
 
     const concurrent = await Promise.all(
-      books.slice(6).map((book) =>
+      books.slice(6, 16).map((book) =>
         rpc(admin, 'request_loan', {
           p_member: temporary.id,
           p_book: book.id,
