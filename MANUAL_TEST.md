@@ -11,3 +11,9 @@
 - [ ] Mark the fine as paid.
 - [ ] Confirm librarian/member role redirects.
 - [ ] Visit `/issues` directly as a member and confirm access is denied.
+- [ ] Confirm dashboard numbers match the corresponding Issues tabs.
+- [ ] Submit six wrong logins and confirm the sixth is rate limited with a retry time.
+- [ ] Open a book with a missing Open Library cover and confirm the initials fallback says
+      “No cover found”.
+- [ ] Search for a term, move through previous/next pagination, and confirm the
+      search term remains in the links.

@@ -56,5 +56,6 @@ as $$
   select 1;
 $$;
 
+-- TODO(Prompt F): invoke this cleanup once daily from the cron route.
 revoke all on function public.delete_stale_rate_limits(integer) from public, anon, authenticated;
 grant execute on function public.delete_stale_rate_limits(integer) to service_role;

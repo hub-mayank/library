@@ -10,6 +10,9 @@ This is a rebuild of an earlier Express + EJS version, whose code is kept in `/l
 - Catalogue search, category filtering, and pagination.
 - Member requests, cancellations, current loans, loan history, and fines.
 - Librarian book management and issue workflow.
+- Librarian dashboard with circulation, overdue, and fine summaries.
+- Open Library book covers with a graceful missing-cover fallback.
+- Postgres-backed rate limits for authentication and writes.
 - Calendar-date loan rules, atomic copy counters, and RLS-backed reads.
 
 ## Live demo
@@ -42,11 +45,24 @@ This is a rebuild of an earlier Express + EJS version, whose code is kept in `/l
 - Authentication uses `auth.getUser()`, not `getSession()`.
 - Login errors are generic to avoid account enumeration.
 - Redirect targets are restricted to same-site paths.
-- Next.js Server Actions provide origin checks; rate limiting is intentionally
-  deferred.
+- Next.js Server Actions provide origin checks. Rate limits use the Postgres
+  `rate_limits` table so they work across serverless instances. Login and
+  registration fail closed if the limiter is unavailable; lending and
+  librarian writes fail open so an infrastructure outage does not block
+  ordinary library operations.
+- All routes receive CSP, clickjacking, MIME-sniffing, referrer, permissions,
+  and production transport-security headers. `script-src` still allows
+  `'unsafe-inline'` because nonce-based CSP would force dynamic rendering;
+  this is a known, documented limitation.
 - The legacy gaps addressed here include member cancellation (G1), atomic copy
   counters (G3), password minimum length (G6), session/CSRF handling (G7/G8),
   and pagination (G11).
+
+### Legacy gaps fixed
+
+| Gap            | Status   |
+| -------------- | -------- |
+| G11 pagination | Complete |
 
 ## Run locally
 
@@ -58,9 +74,9 @@ This is a rebuild of an earlier Express + EJS version, whose code is kept in `/l
 3. Run
    [`supabase/migrations/0001_schema.sql`](./supabase/migrations/0001_schema.sql),
    [`supabase/migrations/0002_functions.sql`](./supabase/migrations/0002_functions.sql),
-   and
-   [`supabase/migrations/0003_rls.sql`](./supabase/migrations/0003_rls.sql) in
-   that order in the Supabase SQL editor.
+   [`supabase/migrations/0003_rls.sql`](./supabase/migrations/0003_rls.sql),
+   and [`supabase/migrations/0004_rate_limit.sql`](./supabase/migrations/0004_rate_limit.sql)
+   in that order in the Supabase SQL editor.
 4. Run `npm run db:seed` to create labelled demo data.
 5. Run `npm run db:verify` to check RLS, permissions, and atomic loan rules
    against the live project.
