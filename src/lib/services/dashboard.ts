@@ -54,6 +54,24 @@ export const getOverdueLoans = (
     )
     .slice(0, 5);
 
+export const getOldestPendingRequests = (loans: DashboardLoan[]) =>
+  loans
+    .filter((loan) => loan.status === 'pending')
+    .sort(
+      (a, b) =>
+        a.requested_at.localeCompare(b.requested_at) ||
+        a.book_title.localeCompare(b.book_title),
+    )
+    .slice(0, 5);
+
+const countOverdueLoans = (loans: DashboardLoan[], today: string): number =>
+  loans.filter(
+    (loan) =>
+      loan.status === 'issued' &&
+      loan.due_date !== null &&
+      loan.due_date < today,
+  ).length;
+
 export const getMostBorrowedBooks = (loans: DashboardLoan[]) => {
   const counts = new Map<string, { title: string; count: number }>();
   for (const loan of loans) {
@@ -62,6 +80,7 @@ export const getMostBorrowedBooks = (loans: DashboardLoan[]) => {
       title: loan.book_title,
       count: 0,
     };
+
     current.count += 1;
     counts.set(loan.book_id, current);
   }
@@ -82,7 +101,7 @@ export const getDashboardStats = (
   members,
   pendingRequests: loans.filter((loan) => loan.status === 'pending').length,
   currentlyIssued: loans.filter((loan) => loan.status === 'issued').length,
-  overdueCount: getOverdueLoans(loans, today).length,
+  overdueCount: countOverdueLoans(loans, today),
   unpaidFines: loans
     .filter((loan) => loan.status === 'returned' && !loan.fine_paid)
     .reduce((sum, loan) => sum + loan.fine, 0),

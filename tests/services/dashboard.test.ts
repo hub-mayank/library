@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   getDashboardStats,
   getMostBorrowedBooks,
+  getOldestPendingRequests,
   getOverdueLoans,
   type DashboardLoan,
 } from '@/lib/services/dashboard';
@@ -45,6 +46,21 @@ describe('dashboard aggregations', () => {
       { title: 'Alpha', count: 1 },
       { title: 'Beta', count: 1 },
     ]);
+  });
+
+  it('orders oldest pending requests by date and then title', () => {
+    expect(
+      getOldestPendingRequests([
+        loan({ id: 'b', status: 'pending', book_title: 'Beta' }),
+        loan({ id: 'a', status: 'pending', book_title: 'Alpha' }),
+        loan({
+          id: 'c',
+          status: 'pending',
+          book_title: 'Earlier',
+          requested_at: '2026-09-30T00:00:00Z',
+        }),
+      ]).map(({ id }) => id),
+    ).toEqual(['c', 'a', 'b']);
   });
 
   it('adds unpaid fines and returns zeroes for empty data', () => {

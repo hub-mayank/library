@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
   getDashboardStats,
   getMostBorrowedBooks,
+  getOldestPendingRequests,
   getOverdueLoans,
   type DashboardLoan,
 } from '@/lib/services/dashboard';
@@ -39,10 +40,7 @@ export default async function DashboardPage() {
   const today = toCalendarDate(new Date());
   const stats = getDashboardStats(books ?? [], loans, members ?? 0, today);
   const overdue = getOverdueLoans(loans, today);
-  const pending = loans
-    .filter((loan) => loan.status === 'pending')
-    .sort((a, b) => a.requested_at.localeCompare(b.requested_at))
-    .slice(0, 5);
+  const pending = getOldestPendingRequests(loans);
   const borrowed = getMostBorrowedBooks(loans);
   const cards = [
     ['Total books', stats.totalBooks],
