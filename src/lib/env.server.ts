@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { z } from 'zod';
 
 const requiredEnvValue = z.string().trim().min(1);
@@ -16,7 +18,9 @@ const formatMissingVariables = (issues: z.ZodError): string => {
   return `Missing or invalid environment variables: ${missingVariables.join(', ')}`;
 };
 
-export const validateServerEnv = (values: NodeJS.ProcessEnv = process.env) => {
+export const validateServerEnv = (
+  values: Record<string, string | undefined> = process.env,
+) => {
   const result = serverEnvSchema.safeParse(values);
 
   if (!result.success) {

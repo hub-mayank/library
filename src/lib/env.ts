@@ -13,7 +13,9 @@ const formatMissingVariables = (issues: z.ZodError): string => {
   return `Missing or invalid environment variables: ${missingVariables.join(', ')}`;
 };
 
-export const validatePublicEnv = (values: NodeJS.ProcessEnv = process.env) => {
+export const validatePublicEnv = (
+  values: Record<string, string | undefined> = process.env,
+) => {
   const result = publicEnvSchema.safeParse(values);
 
   if (!result.success) {
