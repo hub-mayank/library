@@ -9,7 +9,7 @@ import { getCurrentUser } from '@/lib/auth/session';
 
 export default async function Home() {
   const user = await getCurrentUser();
-  if (user) redirect(user.role === 'librarian' ? '/issues' : '/my-books');
+  if (user) redirect(user.role === 'librarian' ? '/dashboard' : '/my-books');
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-16">

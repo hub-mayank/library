@@ -48,18 +48,24 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
             >
               {user ? (
                 <>
-                  <Link href="/books">Books</Link>
                   {user.role === 'member' ? (
-                    <Link href="/my-books">My books</Link>
+                    <>
+                      <Link href="/books">Books</Link>
+                      <Link href="/my-books">My books</Link>
+                    </>
                   ) : (
-                    <Link href="/issues">Issues</Link>
+                    <>
+                      <Link href="/dashboard">Dashboard</Link>
+                      <Link href="/books">Books</Link>
+                      <Link href="/issues">Issues</Link>
+                    </>
                   )}
                   <span className="rounded-full border px-2 py-1">
                     {user.name} · {user.role}
                   </span>
                   <form action={logout}>
                     <button className="underline" type="submit">
-                      Log out
+                      Logout
                     </button>
                   </form>
                 </>

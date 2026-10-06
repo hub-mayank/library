@@ -61,7 +61,7 @@ export async function login(
   const user = await getCurrentUser();
   const next = safeRedirectPath(String(formData.get('next') ?? ''), '');
   if (next) redirect(next);
-  redirect(user?.role === 'librarian' ? '/issues' : '/books');
+  redirect(user?.role === 'librarian' ? '/dashboard' : '/books');
 }
 
 export async function logout(): Promise<void> {
