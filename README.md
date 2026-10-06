@@ -27,4 +27,24 @@ This is a rebuild of an earlier Express + EJS version, whose code is kept in `/l
 
 ## Run locally
 
+## Database setup
+
+1. Create a Supabase project and disable email confirmation for local demo use.
+2. Copy the project URL, anon key, and service-role key to `.env.local` using
+   [`.env.example`](./.env.example) as a guide.
+3. Run
+   [`supabase/migrations/0001_schema.sql`](./supabase/migrations/0001_schema.sql),
+   [`supabase/migrations/0002_functions.sql`](./supabase/migrations/0002_functions.sql),
+   and
+   [`supabase/migrations/0003_rls.sql`](./supabase/migrations/0003_rls.sql) in
+   that order in the Supabase SQL editor.
+4. Run `npm run db:seed` to create labelled demo data.
+5. Run `npm run db:verify` to check RLS, permissions, and atomic loan rules
+   against the live project.
+
 ## Demo credentials
+
+These are demo data credentials for local verification:
+
+- Librarian: `librarian@demo.library.test` / `LibraryDemo123!`
+- Member: `member@demo.library.test` / `LibraryDemo123!`
