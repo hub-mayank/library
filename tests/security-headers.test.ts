@@ -1,23 +1,22 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildContentSecurityPolicy } from '@/config/security-headers';
+import nextConfig from '../next.config';
 
-describe('content security policy', () => {
-  it('includes required sources and only enables eval outside production', () => {
-    const development = buildContentSecurityPolicy(
-      'https://demo.supabase.co',
-      false,
+describe('security headers', () => {
+  it('sets the required headers without a content security policy', async () => {
+    const rules = await nextConfig.headers?.();
+    const headers = new Map(
+      rules?.[0]?.headers?.map(({ key, value }) => [key, value]),
     );
-    const production = buildContentSecurityPolicy(
-      'https://demo.supabase.co',
-      true,
+
+    expect(headers.get('X-Content-Type-Options')).toBe('nosniff');
+    expect(headers.get('Referrer-Policy')).toBe(
+      'strict-origin-when-cross-origin',
     );
-    expect(development).toContain(
-      "connect-src 'self' https://demo.supabase.co",
+    expect(headers.get('X-Frame-Options')).toBe('DENY');
+    expect(headers.get('Permissions-Policy')).toBe(
+      'camera=(), microphone=(), geolocation=()',
     );
-    expect(development).toContain('https://*.archive.org');
-    expect(development).toContain("'unsafe-eval'");
-    expect(production).not.toContain("'unsafe-eval'");
-    expect(production).toContain("frame-ancestors 'none'");
+    expect(headers.has('Content-Security-Policy')).toBe(false);
   });
 });
