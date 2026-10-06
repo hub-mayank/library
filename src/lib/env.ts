@@ -5,6 +5,7 @@ const requiredEnvValue = z.string().trim().min(1);
 export const publicEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: requiredEnvValue.url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: requiredEnvValue,
+  NEXT_PUBLIC_DEMO_MODE: z.enum(['true', 'false']).optional(),
 });
 
 const formatMissingVariables = (issues: z.ZodError): string => {
