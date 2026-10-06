@@ -215,20 +215,23 @@ Librarian                    Server                           DB
 
 ## e. Gaps and Bugs
 
-| # | Description | Type | Location |
-|---|-------------|------|----------|
-| G1 | **No member self-cancellation.** A member can see their pending requests on `/my-books` but has no button to cancel one. Only the librarian can reject it. The UI shows no cancel action for members. | Missing feature | `views/issues/my-books.ejs` — no cancel form |
-| G2 | **Loan-limit check uses request time, not approve time.** If a member already has 3 active items when they request a 4th, that is blocked. But if a librarian approves 3 requests before rejecting, the limit check is only at request time; the approve path does **not** re-check `active.length >= maxBooks`. A librarian could technically approve a 4th request for a member if the member hit the limit later. | Bug / gap | `routes/issues.js:92-122` (approve has no count check) |
-| G3 | **`availableCopies` is a denormalised counter with no reconciliation.** If the server crashes between the `findOneAndUpdate` (decrement) and `issue.save()` during approve, or between `issue.save()` and `Book.updateOne` during return, the counter drifts. No periodic reconciliation job exists. | Bug / data integrity | `routes/issues.js:101-118`, `139-160` |
-| G4 | **Fine is a running-clock display until return, then frozen.** `currentFine()` for an issued/overdue book computes live from `now`. Once returned, `fine` is frozen at return-day. There is no server-side job to freeze or record fines for books still outstanding (e.g. for reporting). | Design note | `models/Issue.js:48-56` |
-| G5 | **Open Library cover image is UI-only.** Covers are fetched client-side via `https://covers.openlibrary.org/b/isbn/<ISBN>-L.jpg`. No server-side validation that a cover exists. The `onerror` handler hides a broken `<img>` gracefully, but there is no server-enforced relationship with Open Library. | Design note / external dependency | `views/books/index.ejs:61-62` |
-| G6 | **Password minimum-length (6) enforced server-side but not in HTML.** The `<input type="password">` in `views/register.ejs` has no `minlength` attribute. The check exists server-side (`routes/auth.js:28`) but the browser offers no native hint. | Minor UX gap | `views/register.ejs` |
-| G7 | **Session cookie is not marked `httpOnly` or `secure`.** `express-session` defaults `httpOnly: true` but `secure` is not set, so the cookie will be sent over plain HTTP in development. No `sameSite` attribute is set either. | Security gap | `server.js:36-42` |
-| G8 | **No CSRF protection.** All state-changing POST routes (approve, reject, return, pay, delete) rely solely on session auth. There is no CSRF token. | Security gap | All POST routes |
-| G9 | **`connect-mongo` is imported incorrectly.** `const { MongoStore } = require("connect-mongo")` uses named destructuring, but `connect-mongo` v4+ exports the class as the default export. The correct form is `const MongoStore = require("connect-mongo")`. This likely throws at startup. | Bug | `server.js:6` |
-| G10 | **`isMember` middleware also blocks librarians from their own redirected pages.** If a librarian visits `/my-books` or tries to request a book, they get "Only members can borrow books" and are redirected to `/`. This is intentional by design but undocumented. Librarians see no borrow UI at all. | Design decision (undocumented) | `middleware/auth.js:26-29` |
-| G11 | **No pagination on any list.** The catalogue (`/books`), issue tabs (`/issues`), and member history (`/my-books`) fetch all matching documents. This could be slow with a large dataset. | Scalability gap | `routes/books.js:60`, `routes/issues.js:84`, `routes/issues.js:43` |
-| G12 | **`daysLate()` uses `Math.round`, which can produce unexpected results at exactly half a day.** A book returned 12 hours after midnight on the due date rounds to 1 day late instead of 0. `Math.floor` would be safer. | Minor bug / rounding | `models/Issue.js:36` |
+> **G2 dropped** — not a bug. Approving a request converts `pending → issued`; the member's active count (pending + issued) is unchanged, so no re-check at approve time is needed.
+>
+> **G9 dropped** — legacy-only; not relevant to the rebuild.
+>
+> **G12 dropped** — `startOfDay()` zeroes the time component on both operands before subtracting, so the result is always an exact multiple of `oneDay`. `Math.round` is only a DST guard (±1 h shift). The "12 hours after midnight" scenario cannot occur. Analysis was incorrect.
+
+| # | Description | Type | Location | Decision |
+|---|-------------|------|----------|----------|
+| G1 | **No member self-cancellation.** A member can see their pending requests on `/my-books` but has no button to cancel one. Only the librarian can reject it. | Missing feature | `views/issues/my-books.ejs` | **Fix.** Add a `cancelled` status and a cancel button for members. |
+| G3 | **`availableCopies` counter can drift on crash.** If the server crashes between the atomic decrement and `issue.save()` (approve), or between `issue.save()` and `Book.updateOne` (return), the counter becomes inconsistent. No reconciliation job exists. | Bug / data integrity | `routes/issues.js:101-118`, `139-160` | **Fix.** Approve and return become single atomic DB operations with row-level locking and a `CHECK (available_copies BETWEEN 0 AND total_copies)` constraint in Postgres. |
+| G4 | **Fine is a running-clock display until return, then frozen.** `currentFine()` computes live for issued/overdue books; once returned, `fine` is frozen at return-day. | Design note | `models/Issue.js:48-56` | **Keep.** Live fine while issued, frozen at return. |
+| G5 | **Open Library covers are UI-only.** Covers fetched client-side; `onerror` hides broken images gracefully. No server-side relationship with Open Library. | Design note | `views/books/index.ejs:61-62` | **Keep.** Client-side with graceful fallback. |
+| G6 | **Password `minlength` missing from HTML.** Server enforces ≥ 6 chars (`routes/auth.js:28`) but the `<input>` has no `minlength` attribute. | Minor UX gap | `views/register.ejs` | **Fix.** Add `minlength` to the input and a `zod` `.min(6)` rule. |
+| G7 | **Session cookie lacks `secure` and `sameSite`.** `express-session` defaults `httpOnly: true` but `secure` is unset; cookie is sent over plain HTTP. No `sameSite` attribute. | Security gap | `server.js:36-42` | **Solved by design.** Supabase Auth handles cookies; Next.js Server Actions include built-in origin checks. Document in README. |
+| G8 | **No CSRF protection.** All state-changing POST routes rely solely on session auth; no CSRF token. | Security gap | All POST routes | **Solved by design.** Same as G7 — Server Actions + Supabase Auth. Document in README. |
+| G10 | **Librarians cannot borrow books (undocumented).** `isMember` redirects librarians who visit `/my-books` or try to request a book. Intentional but not written down anywhere. | Design decision | `middleware/auth.js:26-29` | **Keep.** Document as intended behaviour. |
+| G11 | **No pagination on any list.** The catalogue (`/books`), issue tabs (`/issues`), and member history (`/my-books`) fetch all matching documents. | Scalability gap | `routes/books.js:60`, `routes/issues.js:84`, `routes/issues.js:43` | **Fix.** Server-side pagination on the catalogue and issue lists. |
 
 ---
 
