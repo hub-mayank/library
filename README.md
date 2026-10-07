@@ -1,152 +1,121 @@
-# Library Management & Book Lending System
+# Community Library
 
-A web app for running a small library. Members can search the catalogue and request books. The librarian approves requests, takes books back, and collects fines for late returns.
+## Pitch
 
-**Live site:** https://library-psal.onrender.com/
-
-## Features
-
-**Members**
-- Register and login
-- Search books by title or author, and filter by category
-- See book covers, fetched from Open Library using the ISBN already stored on the book
-- Request a book (the librarian has to approve it)
-- See current books, due dates, days left, fines and borrowing history
-
-**Librarian**
-- Add, edit and delete books (title, author, ISBN, category, total copies, available copies)
-- Approve or reject requests
-- Mark books as returned
-- Mark fines as paid
-- Dashboard with total books, issued books, overdue books, pending requests, fines and the most borrowed titles
-
-## Borrowing rules
-
-| Rule | Value |
-|---|---|
-| Books a member can have at once | 3 (pending requests count too) |
-| Loan period | 14 days |
-| Late fine | ₹5 for each day after the due date |
-
-These numbers are in `models/Issue.js`, so they can be changed in one place.
-
-A request cannot be made when a book has no copies left, when the member already has that book, or when the member is at the limit. Available copies go down by one when a request is approved and back up when the book is returned.
-
-## How a request moves
-
-```
-pending  ->  issued  ->  returned
-   |
-   -> rejected
-```
-
-- **pending**: the member asked for the book
-- **issued**: the librarian approved it, one copy is taken and the due date is set
-- **returned**: the book came back, any fine is worked out and saved
-- **rejected**: the librarian turned the request down
-
-An issued book past its due date shows as **overdue**, and its fine keeps growing until it is returned.
+A small, secure library app for browsing books, requesting loans, and managing circulation.
 
 ## Tech stack
 
-- Node.js and Express.js
-- EJS for server side rendering
-- MongoDB Atlas with Mongoose
-- Sessions with express-session and connect-mongo
-- bcryptjs for hashing passwords
-- Plain CSS
+- Next.js App Router and Server Actions
+- TypeScript with strict checking
+- Tailwind CSS
+- Supabase Postgres, Auth, RLS, and SQL functions
+- Zod validation and Vitest tests
+- Vercel deployment
 
-## Folder structure
+## Architecture
 
-```
-server.js          app setup, session, routes
-seed.js            demo data
-models/
-  User.js          member or librarian
-  Book.js          catalogue and the category list
-  Issue.js         requests and loans, rules and fine logic
-middleware/
-  auth.js          isLoggedIn, isLibrarian, isMember, isGuest
-routes/
-  auth.js          home, register, login, logout
-  books.js         catalogue, search, book add/edit/delete
-  issues.js        request, approve, reject, return, pay fine, my books
-  dashboard.js     librarian dashboard
-views/             EJS pages
-public/css/        style.css
+```mermaid
+flowchart LR
+  Browser --> Next["Next.js Server Actions"]
+  Next --> RLS["Supabase RLS reads"]
+  Next --> Functions["Service-role writes via Postgres functions"]
+  RLS --> Postgres[(Postgres)]
+  Functions --> Postgres
 ```
 
-## Running it locally
+## Features
 
-1. Install the packages
+- Member and librarian roles with protected Server Actions.
+- Catalogue search, category filtering, and pagination.
+- Member requests, cancellations, current loans, loan history, and fines.
+- Librarian book management, issue workflow, and read-only dashboard.
+- Open Library book covers with a graceful missing-cover fallback.
+- Postgres-backed rate limits for authentication and writes.
+- Calendar-date loan rules, atomic copy counters, and RLS-backed reads.
 
-   ```
-   npm install
-   ```
+## Decisions
 
-2. Copy `.env.example` to `.env` and fill in the values
+- Supabase provides hosted Postgres, Auth, RLS, and SQL functions without
+  adding a separate backend service.
+- Calendar dates avoid timezone surprises for due dates and fines. The
+  library timezone is `Asia/Kolkata`.
+- Atomic SQL functions protect copy counters and loan transitions from
+  concurrent requests.
+- Business rules live in [`src/lib/rules`](./src/lib/rules) and
+  [`src/config/library-rules.ts`](./src/config/library-rules.ts).
 
-   ```
-   MONGO_URI=your mongodb atlas connection string
-   SESSION_SECRET=any long random text
-   PORT=3000
-   ```
+## Security decisions
 
-   Make sure the connection string has a database name before the `?`, for example `...mongodb.net/library?retryWrites=true`.
+- Signed-in Supabase SSR clients enforce RLS for reads.
+- Service-role writes are used only after Server Actions re-check
+  authentication, role, ownership, and validated input.
+- Roles come from `profiles`, never client input or user metadata.
+- Authentication uses `auth.getUser()`, and login errors are generic.
+- Redirect targets are restricted to same-site paths.
+- Required security headers deny MIME sniffing, framing, camera,
+  microphone, and geolocation. Content Security Policy is intentionally not
+  built.
+- Login and registration rate limits fail closed; lending and librarian
+  writes fail open when the limiter is unavailable.
 
-3. Add the demo data (this clears the old library data first)
+## Legacy gaps fixed
 
-   ```
-   npm run seed
-   ```
+- G1: members can cancel pending requests.
+- G3: copy counters and loan transitions are atomic.
+- G6: password minimum length is validated.
+- G7/G8: authenticated sessions and Server Action origin protections are used.
+- G11: catalogue, history, and issue views have pagination.
 
-4. Start the server
+## Run locally
 
-   ```
-   npm start
-   ```
+1. Install dependencies with `npm install`.
+2. Copy [`.env.example`](./.env.example) to `.env.local` and fill in the
+   Supabase values.
+3. Apply the migrations in
+   [`supabase/migrations`](./supabase/migrations) in numeric order.
+4. Run `npm run db:seed` for labelled demo data.
+5. Start the app with `npm run dev`.
 
-   Then open http://localhost:3000
+## Deploy to Vercel
 
-## Demo accounts
+1. Import the repository into Vercel.
+2. Set these environment variables for the deployment:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_DEMO_MODE`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+3. Apply all Supabase migrations before opening the deployment.
+4. Set the Supabase Auth site URL and redirect URLs to the Vercel URL.
 
-| Role | Email | Password |
-|---|---|---|
-| Librarian | librarian@library.com | librarian123 |
-| Member | aarav@demo.com | member123 |
-| Member | priya@demo.com | member123 |
-| Member | rohan@demo.com | member123 |
+`RESEND_API_KEY` and `CRON_SECRET` were removed because email reminders and
+cron jobs are not implemented or used.
 
-Aarav is already at the 3 book limit and has an overdue book, so he is a good account for showing the limit and fines.
+## Screenshots
 
-New sign ups are always members. The librarian account only comes from the seed script.
+TODO: add screenshots.
 
-## Routes
+## Live demo
 
-| Method | Path | Who | What it does |
-|---|---|---|---|
-| GET | `/` | everyone | home page, or sends a logged in user to their page |
-| GET, POST | `/register` | guests | create a member account |
-| GET, POST | `/login` | guests | login |
-| POST | `/logout` | logged in | logout |
-| GET | `/books` | logged in | catalogue with `?search=` and `?category=` |
-| GET, POST | `/books/new`, `/books` | librarian | add a book |
-| GET, POST | `/books/:id/edit` | librarian | edit a book |
-| POST | `/books/:id/delete` | librarian | delete a book |
-| POST | `/books/:id/request` | member | request a book |
-| GET | `/my-books` | member | current books and history |
-| GET | `/issues` | librarian | requests and loans, with `?tab=` |
-| POST | `/issues/:id/approve` | librarian | approve a request |
-| POST | `/issues/:id/reject` | librarian | reject a request |
-| POST | `/issues/:id/return` | librarian | mark a book returned |
-| POST | `/issues/:id/pay` | librarian | mark a fine paid |
-| GET | `/dashboard` | librarian | dashboard |
+TODO: add the deployed URL.
 
-## Deploying on Render
+## Lighthouse
 
-1. Push the code to GitHub. The `.env` file is not pushed.
-2. On Render, create a **New Web Service** from the repository.
-3. Build command `npm install`, start command `npm start`.
-4. Add the environment variables `MONGO_URI` and `SESSION_SECRET`.
-5. In MongoDB Atlas, go to Network Access and allow `0.0.0.0/0` so Render can connect.
-6. Run `npm run seed` once from your own computer with the Atlas connection string to add the demo data.
+to be filled with measured numbers
+
+## Future work
+
+The following are intentionally not built:
+
+- Rate limiting improvements beyond the current database limiter
+- Content-Security-Policy
+- AI search
+- Email reminders
+- Browser end-to-end tests
+
+## Demo credentials
+
+These credentials are for local demo data only:
+
+- Librarian: `librarian@demo.library.test` / `LibraryDemo123!`
+- Member: `member@demo.library.test` / `LibraryDemo123!`
