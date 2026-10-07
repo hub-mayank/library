@@ -65,11 +65,16 @@ export default async function IssuesPage({
   const { data: loans } = await loansQuery;
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10">
-      <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700">
-        Librarian workspace
-      </p>
-      <h1 className="mt-1 text-4xl font-bold tracking-tight">Issues</h1>
+    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
+      <section className="rounded-3xl bg-slate-900 px-6 py-7 text-white shadow-xl shadow-slate-950/10 sm:px-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">
+          Librarian workspace
+        </p>
+        <h1 className="mt-2 text-4xl font-bold tracking-tight">Issues</h1>
+        <p className="mt-3 max-w-xl text-slate-300">
+          Review requests, keep returns moving, and close the loop on fines.
+        </p>
+      </section>
       {params.message ? (
         <p
           className="my-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-emerald-900"
@@ -80,7 +85,7 @@ export default async function IssuesPage({
       ) : null}
       <nav
         aria-label="Issue status"
-        className="my-8 flex gap-2 overflow-x-auto rounded-2xl border bg-white p-2 shadow-sm"
+        className="my-6 flex gap-2 overflow-x-auto rounded-2xl border bg-white p-2 shadow-sm"
       >
         {tabs.map((item) => (
           <a
@@ -105,7 +110,7 @@ export default async function IssuesPage({
               : 0;
             return (
               <article
-                className="rounded-2xl border bg-white p-4 shadow-sm"
+                className="rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 key={loan.id}
               >
                 <div className="flex gap-3">
@@ -128,13 +133,13 @@ export default async function IssuesPage({
                   </span>
                 </p>
                 {overdue ? (
-                  <p>
+                  <p className="mt-2 rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-800">
                     Overdue by {overdue} days · Fine ₹
                     {overdue * FINE_PER_DAY_INR}
                   </p>
                 ) : null}
                 {loan.fine ? (
-                  <p>
+                  <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">
                     Fine: ₹{loan.fine}
                     {loan.fine_paid ? ' (paid)' : ''}
                   </p>

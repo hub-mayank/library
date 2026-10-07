@@ -15,9 +15,20 @@ export function BookForm({
   book?: Record<string, unknown>;
 }) {
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-3xl font-bold">{title}</h1>
-      <form action={saveBook} className="space-y-4">
+    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-10">
+      <div className="mb-7">
+        <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700">
+          Catalogue management
+        </p>
+        <h1 className="mt-1 text-4xl font-bold tracking-tight">{title}</h1>
+        <p className="mt-2 text-slate-600">
+          Keep the catalogue accurate so every reader can find their next book.
+        </p>
+      </div>
+      <form
+        action={saveBook}
+        className="space-y-5 rounded-3xl border bg-white p-6 shadow-sm sm:p-8"
+      >
         {book?.id ? (
           <input type="hidden" name="bookId" value={String(book.id)} />
         ) : null}
@@ -27,7 +38,7 @@ export function BookForm({
               {field[0].toUpperCase() + field.slice(1)}
             </span>
             <input
-              className="w-full rounded border px-3 py-2"
+              className="mt-1 w-full rounded-xl border px-3 py-2.5 shadow-sm"
               name={field}
               defaultValue={String(book?.[field] ?? '')}
               required
@@ -37,7 +48,7 @@ export function BookForm({
         <label className="block">
           <span className="mb-1 block font-medium">Category</span>
           <select
-            className="w-full rounded border px-3 py-2"
+            className="mt-1 w-full rounded-xl border px-3 py-2.5 shadow-sm"
             name="category"
             defaultValue={String(book?.category ?? '')}
             required
@@ -53,7 +64,7 @@ export function BookForm({
         <label className="block">
           <span className="mb-1 block font-medium">Total copies</span>
           <input
-            className="w-full rounded border px-3 py-2"
+            className="mt-1 w-full rounded-xl border px-3 py-2.5 shadow-sm"
             name="totalCopies"
             type="number"
             min={1}
@@ -63,7 +74,7 @@ export function BookForm({
           />
         </label>
         <button
-          className="rounded bg-blue-700 px-4 py-2 text-white"
+          className="rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white shadow-sm hover:bg-emerald-900"
           type="submit"
         >
           Save book
