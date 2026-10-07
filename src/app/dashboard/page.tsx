@@ -54,22 +54,36 @@ export default async function DashboardPage() {
   ] as const;
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10">
+      <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700">
+        Overview
+      </p>
+      <h1 className="mt-1 text-4xl font-bold tracking-tight">Dashboard</h1>
+      <p className="mt-2 text-slate-600">
+        A quick pulse on your library today.
+      </p>
       <dl className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         {cards.map(([label, value]) => (
-          <div className="rounded border p-4" key={label}>
+          <div
+            className="rounded-2xl border bg-white p-5 shadow-sm"
+            key={label}
+          >
             <dt className="text-sm text-slate-600">{label}</dt>
-            <dd className="mt-1 text-2xl font-semibold">{value}</dd>
+            <dd className="mt-2 text-3xl font-bold tracking-tight text-emerald-950">
+              {value}
+            </dd>
           </div>
         ))}
       </dl>
       <div className="mt-10 grid gap-8 md:grid-cols-3">
-        <section>
+        <section className="rounded-2xl border bg-white p-5 shadow-sm">
           <h2 className="text-xl font-semibold">Overdue loans</h2>
           <ul className="mt-3 space-y-2">
             {overdue.map((loan) => (
-              <li className="rounded border p-3" key={loan.id}>
+              <li
+                className="rounded-xl bg-rose-50 p-3 text-sm text-rose-950"
+                key={loan.id}
+              >
                 {loan.member_name} · {loan.book_title} · {loan.daysLate} days
                 late · ₹{loan.liveFine}
               </li>
@@ -77,18 +91,21 @@ export default async function DashboardPage() {
             {!overdue.length ? <li>No overdue loans.</li> : null}
           </ul>
         </section>
-        <section>
+        <section className="rounded-2xl border bg-white p-5 shadow-sm">
           <h2 className="text-xl font-semibold">Pending requests</h2>
           <ul className="mt-3 space-y-2">
             {pending.map((loan) => (
-              <li className="rounded border p-3" key={loan.id}>
+              <li
+                className="rounded-xl bg-amber-50 p-3 text-sm text-amber-950"
+                key={loan.id}
+              >
                 {loan.member_name} · {loan.book_title}
               </li>
             ))}
             {!pending.length ? <li>No pending requests.</li> : null}
           </ul>
         </section>
-        <section>
+        <section className="rounded-2xl border bg-white p-5 shadow-sm">
           <h2 className="text-xl font-semibold">Most borrowed books</h2>
           <ol className="mt-3 list-decimal space-y-2 pl-5">
             {borrowed.map((book) => (

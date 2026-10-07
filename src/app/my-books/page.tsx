@@ -41,7 +41,10 @@ export default async function MyBooksPage({
       ?.filter((loan) => loan.status === 'returned' && !loan.fine_paid)
       .reduce((sum, loan) => sum + loan.fine, 0) ?? 0;
   const card = (loan: (typeof current)[number]) => (
-    <article className="rounded border p-4" key={loan.id}>
+    <article
+      className="rounded-2xl border bg-white p-4 shadow-sm"
+      key={loan.id}
+    >
       <div className="flex gap-3">
         {loan.books?.isbn ? (
           <BookCover isbn={loan.books.isbn} title={loan.books.title} small />
@@ -50,9 +53,11 @@ export default async function MyBooksPage({
           <h3 className="font-semibold">
             {loan.books?.title ?? 'Unknown book'}
           </h3>
-          <p className="text-sm">Status: {loan.status}</p>
+          <span className="mt-1 inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold capitalize text-amber-800">
+            {loan.status}
+          </span>
           {loan.due_date && loan.status === 'issued' ? (
-            <p>
+            <p className="mt-2 text-sm font-medium text-slate-600">
               {calculateDaysLate(loan.due_date, today)
                 ? `Overdue by ${calculateDaysLate(loan.due_date, today)} days`
                 : 'Not overdue'}
@@ -61,7 +66,7 @@ export default async function MyBooksPage({
         </div>
       </div>
       {loan.fine > 0 ? (
-        <p>
+        <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-800">
           Fine: ₹{loan.fine}
           {loan.fine_paid ? ' (paid)' : ''}
         </p>
@@ -69,7 +74,10 @@ export default async function MyBooksPage({
       {loan.status === 'pending' ? (
         <form action={cancelBookLoan} className="mt-3">
           <input type="hidden" name="loanId" value={loan.id} />
-          <button className="rounded border px-3 py-1" type="submit">
+          <button
+            className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-slate-50"
+            type="submit"
+          >
             Cancel
           </button>
         </form>
@@ -77,21 +85,42 @@ export default async function MyBooksPage({
     </article>
   );
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8">
-      <h1 className="text-3xl font-bold">My books</h1>
+    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:py-10">
+      <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700">
+        Your reading list
+      </p>
+      <h1 className="mt-1 text-4xl font-bold tracking-tight">My books</h1>
       {params.message ? (
-        <p className="my-4 rounded border p-3" role="status">
+        <p
+          className="my-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-emerald-900"
+          role="status"
+        >
           {params.message}
         </p>
       ) : null}
-      <p className="my-4">Unpaid fines: ₹{unpaid}</p>
-      <h2 className="mb-3 text-2xl font-semibold">Current</h2>
+      <p className="my-6 inline-flex rounded-xl border bg-white px-4 py-3 text-sm shadow-sm">
+        Unpaid fines:{' '}
+        <span className="ml-1 font-bold text-rose-700">₹{unpaid}</span>
+      </p>
+      <h2 className="mb-3 text-2xl font-semibold">Current loans</h2>
       <div className="grid gap-4 sm:grid-cols-2">
-        {current.length ? current.map(card) : <p>No current loans.</p>}
+        {current.length ? (
+          current.map(card)
+        ) : (
+          <p className="rounded-2xl border bg-white p-8 text-slate-600 shadow-sm">
+            No current loans.
+          </p>
+        )}
       </div>
       <h2 className="mb-3 mt-10 text-2xl font-semibold">History</h2>
       <div className="grid gap-4 sm:grid-cols-2">
-        {history.length ? history.map(card) : <p>No loan history.</p>}
+        {history.length ? (
+          history.map(card)
+        ) : (
+          <p className="rounded-2xl border bg-white p-8 text-slate-600 shadow-sm">
+            No loan history.
+          </p>
+        )}
       </div>
       <Pagination
         basePath="/my-books"

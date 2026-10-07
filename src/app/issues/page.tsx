@@ -65,18 +65,27 @@ export default async function IssuesPage({
   const { data: loans } = await loansQuery;
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <h1 className="text-3xl font-bold">Issues</h1>
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10">
+      <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700">
+        Librarian workspace
+      </p>
+      <h1 className="mt-1 text-4xl font-bold tracking-tight">Issues</h1>
       {params.message ? (
-        <p className="my-4 rounded border p-3" role="status">
+        <p
+          className="my-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-emerald-900"
+          role="status"
+        >
           {params.message}
         </p>
       ) : null}
-      <nav aria-label="Issue status" className="my-6 flex flex-wrap gap-3">
+      <nav
+        aria-label="Issue status"
+        className="my-8 flex gap-2 overflow-x-auto rounded-2xl border bg-white p-2 shadow-sm"
+      >
         {tabs.map((item) => (
           <a
             aria-current={tab === item ? 'page' : undefined}
-            className="underline"
+            className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium capitalize ${tab === item ? 'bg-emerald-800 text-white' : 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-800'}`}
             href={`/issues?tab=${item}`}
             key={item}
           >
@@ -85,7 +94,9 @@ export default async function IssuesPage({
         ))}
       </nav>
       {!loans?.length ? (
-        <p className="rounded border p-6">No loans in this view.</p>
+        <p className="rounded-2xl border bg-white p-10 text-center text-slate-600 shadow-sm">
+          No loans in this view.
+        </p>
       ) : (
         <div className="space-y-3">
           {loans.map((loan) => {
@@ -93,7 +104,10 @@ export default async function IssuesPage({
               ? calculateDaysLate(loan.due_date, today)
               : 0;
             return (
-              <article className="rounded border p-4" key={loan.id}>
+              <article
+                className="rounded-2xl border bg-white p-4 shadow-sm"
+                key={loan.id}
+              >
                 <div className="flex gap-3">
                   {loan.books?.isbn ? (
                     <BookCover
@@ -106,8 +120,12 @@ export default async function IssuesPage({
                     {loan.books?.title ?? 'Unknown book'}
                   </h2>
                 </div>
-                <p>
-                  {loan.profiles?.name ?? 'Unknown member'} · {loan.status}
+                <p className="mt-3 text-sm text-slate-600">
+                  {loan.profiles?.name ?? 'Unknown member'}{' '}
+                  <span className="mx-1 text-slate-300">·</span>{' '}
+                  <span className="font-medium capitalize text-slate-900">
+                    {loan.status}
+                  </span>
                 </p>
                 {overdue ? (
                   <p>
@@ -126,13 +144,13 @@ export default async function IssuesPage({
                     <>
                       <form action={approve}>
                         <input type="hidden" name="loanId" value={loan.id} />
-                        <button className="rounded bg-blue-700 px-3 py-1 text-white">
+                        <button className="rounded-lg bg-emerald-800 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-900">
                           Approve
                         </button>
                       </form>
                       <form action={reject}>
                         <input type="hidden" name="loanId" value={loan.id} />
-                        <button className="rounded border px-3 py-1">
+                        <button className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-slate-50">
                           Reject
                         </button>
                       </form>
@@ -141,7 +159,7 @@ export default async function IssuesPage({
                   {loan.status === 'issued' ? (
                     <form action={returnBook}>
                       <input type="hidden" name="loanId" value={loan.id} />
-                      <button className="rounded bg-blue-700 px-3 py-1 text-white">
+                      <button className="rounded-lg bg-emerald-800 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-900">
                         Return
                       </button>
                     </form>
@@ -151,7 +169,7 @@ export default async function IssuesPage({
                   !loan.fine_paid ? (
                     <form action={payFine}>
                       <input type="hidden" name="loanId" value={loan.id} />
-                      <button className="rounded border px-3 py-1">
+                      <button className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-slate-50">
                         Mark paid
                       </button>
                     </form>

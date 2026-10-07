@@ -68,36 +68,53 @@ export default async function BooksPage({
       : { count: null };
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold">Books</h1>
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700">
+            The catalogue
+          </p>
+          <h1 className="mt-1 text-4xl font-bold tracking-tight">
+            Find your next read
+          </h1>
+          <p className="mt-2 text-slate-600">
+            Browse the shelves and make your next request.
+          </p>
+        </div>
         {user.role === 'librarian' ? (
           <Link
-            className="rounded bg-blue-700 px-4 py-2 text-white"
+            className="rounded-xl bg-emerald-800 px-4 py-3 font-semibold text-white shadow-sm hover:bg-emerald-900"
             href="/books/new"
           >
             Add book
           </Link>
         ) : (
-          <span>
-            {activeCount ?? 0} of {MAX_ACTIVE_LOANS} active loans
+          <span className="rounded-xl border bg-white px-4 py-3 text-sm font-medium shadow-sm">
+            <span className="text-emerald-800">{activeCount ?? 0}</span> /{' '}
+            {MAX_ACTIVE_LOANS} active loans
           </span>
         )}
       </div>
       {params.message ? (
-        <p className="my-4 rounded border p-3" role="status">
+        <p
+          className="my-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-emerald-900"
+          role="status"
+        >
           {params.message}
         </p>
       ) : null}
-      <form className="my-6 flex flex-wrap gap-3" method="get">
+      <form
+        className="my-8 flex flex-wrap gap-3 rounded-2xl border bg-white p-4 shadow-sm"
+        method="get"
+      >
         <input
-          className="rounded border px-3 py-2"
+          className="min-w-0 flex-1 rounded-xl border px-3 py-2.5 sm:min-w-64"
           name="q"
           defaultValue={params.q}
           placeholder="Search title or author"
         />
         <select
-          className="rounded border px-3 py-2"
+          className="rounded-xl border px-3 py-2.5"
           name="category"
           defaultValue={category ?? ''}
         >
@@ -108,31 +125,54 @@ export default async function BooksPage({
             </option>
           ))}
         </select>
-        <button className="rounded border px-4 py-2" type="submit">
+        <button
+          className="rounded-xl bg-emerald-800 px-5 py-2.5 font-semibold text-white hover:bg-emerald-900"
+          type="submit"
+        >
           Search
         </button>
-        <Link className="px-4 py-2 underline" href="/books">
+        <Link
+          className="rounded-xl px-4 py-2.5 text-slate-600 hover:bg-slate-100"
+          href="/books"
+        >
           Clear
         </Link>
       </form>
       {!books?.length ? (
-        <p className="rounded border p-6">No books found.</p>
+        <p className="rounded-2xl border bg-white p-10 text-center text-slate-600 shadow-sm">
+          No books found.
+        </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {books.map((book) => (
-            <article className="rounded border p-4" key={book.id}>
+            <article
+              className="group flex h-full flex-col rounded-2xl border bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg"
+              key={book.id}
+            >
               <div className="flex gap-4">
                 <BookCover isbn={book.isbn} title={book.title} />
                 <div>
-                  <h2 className="text-xl font-semibold">{book.title}</h2>
-                  <p>{book.author}</p>
+                  <h2 className="text-xl font-semibold leading-tight group-hover:text-emerald-800">
+                    {book.title}
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-600">{book.author}</p>
                 </div>
               </div>
-              <p className="mt-2 text-sm">
-                {book.category} · ISBN {book.isbn}
+              <p className="mt-4 text-xs font-medium uppercase tracking-wide text-slate-500">
+                {book.category} <span className="mx-1 text-slate-300">·</span>{' '}
+                ISBN {book.isbn}
               </p>
-              <p className="mt-2">
-                {book.available_copies} / {book.total_copies} available
+              <p className="mt-auto pt-5 text-sm font-medium">
+                <span
+                  className={
+                    book.available_copies ? 'text-emerald-700' : 'text-rose-700'
+                  }
+                >
+                  {book.available_copies} available
+                </span>{' '}
+                <span className="text-slate-400">
+                  of {book.total_copies} copies
+                </span>
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 {user.role === 'member' ? (
@@ -140,7 +180,7 @@ export default async function BooksPage({
                     <input type="hidden" name="bookId" value={book.id} />
                     <button
                       disabled={book.available_copies === 0}
-                      className="rounded bg-blue-700 px-3 py-2 text-white disabled:opacity-50"
+                      className="rounded-xl bg-emerald-800 px-3 py-2 font-semibold text-white hover:bg-emerald-900 disabled:cursor-not-allowed disabled:bg-slate-300"
                     >
                       {book.available_copies ? 'Request' : 'No copies'}
                     </button>
